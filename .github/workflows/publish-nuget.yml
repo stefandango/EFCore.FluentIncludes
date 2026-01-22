@@ -24,19 +24,21 @@ jobs:
             9.0.x
             10.0.x
 
-      - name: Restore
-        run: dotnet restore src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj
+      - name: Remove SDK pin for multi-target build
+        run: rm -f global.json
 
-      - name: Build all frameworks
-        run: dotnet build src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release --no-restore
-
-      - name: Pack
+      - name: Build and Pack
         run: |
+          VERSION_ARG=""
           if [ -n "${{ github.event.inputs.version }}" ]; then
-            dotnet pack src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release --no-build --no-restore -p:Version=${{ github.event.inputs.version }}
-          else
-            dotnet pack src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release --no-build --no-restore
+            VERSION_ARG="-p:Version=${{ github.event.inputs.version }}"
           fi
+
+          # Pack (will build all frameworks)
+          dotnet pack src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release $VERSION_ARG
+
+          # List what was built
+          ls -la src/EFCore.FluentIncludes/bin/Release/
 
       - name: Verify package contents
         run: unzip -l src/EFCore.FluentIncludes/bin/Release/*.nupkg
