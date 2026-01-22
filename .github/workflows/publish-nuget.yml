@@ -24,12 +24,18 @@ jobs:
             9.0.x
             10.0.x
 
+      - name: Restore
+        run: dotnet restore src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj
+
+      - name: Build all frameworks
+        run: dotnet build src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release --no-restore
+
       - name: Pack
         run: |
           if [ -n "${{ github.event.inputs.version }}" ]; then
-            dotnet pack src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release -p:Version=${{ github.event.inputs.version }}
+            dotnet pack src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release --no-build --no-restore -p:Version=${{ github.event.inputs.version }}
           else
-            dotnet pack src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release
+            dotnet pack src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj -c Release --no-build --no-restore
           fi
 
       - name: Verify package contents
