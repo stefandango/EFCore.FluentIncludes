@@ -91,3 +91,7 @@ appsettings.*.json
 
 # Secrets
 secrets.json
+
+# Claude Code
+CLAUDE.md
+.claude/
