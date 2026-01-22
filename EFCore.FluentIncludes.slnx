@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EFCore.FluentIncludes.Tests/EFCore.FluentIncludes.Tests.csproj" />
+  </Folder>
+</Solution>
