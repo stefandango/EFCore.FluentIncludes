@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+
+  <!-- Chain/path lines representing includes -->
+  <g stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round">
+    <!-- Main path -->
+    <path d="M 28 40 L 50 40 L 50 64 L 72 64" opacity="0.9"/>
+    <path d="M 72 64 L 100 64" opacity="0.9"/>
+
+    <!-- Branch paths -->
+    <path d="M 50 64 L 50 88 L 72 88" opacity="0.7"/>
+    <path d="M 72 88 L 100 88" opacity="0.7"/>
+
+    <path d="M 72 64 L 72 40 L 100 40" opacity="0.7"/>
+  </g>
+
+  <!-- Dots representing entities -->
+  <g fill="#fff">
+    <circle cx="28" cy="40" r="6"/>
+    <circle cx="50" cy="64" r="5" opacity="0.9"/>
+    <circle cx="72" cy="64" r="5" opacity="0.9"/>
+    <circle cx="100" cy="40" r="4" opacity="0.8"/>
+    <circle cx="100" cy="64" r="4" opacity="0.8"/>
+    <circle cx="100" cy="88" r="4" opacity="0.8"/>
+  </g>
+</svg>
