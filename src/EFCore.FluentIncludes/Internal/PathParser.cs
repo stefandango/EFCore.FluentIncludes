@@ -18,21 +18,21 @@ internal static class PathParser
     public static List<PathSegment> Parse<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> pathExpression)
     {
         var segments = new List<PathSegment>();
-        ParseExpression(pathExpression.Body, segments);
+        ParseExpression(pathExpression.Body, segments, pendingFilter: null);
         segments.Reverse(); // Segments are collected in reverse order
         return segments;
     }
 
-    private static void ParseExpression(Expression expression, List<PathSegment> segments)
+    private static void ParseExpression(Expression expression, List<PathSegment> segments, LambdaExpression? pendingFilter)
     {
         switch (expression)
         {
             case MemberExpression memberExpr:
-                ParseMemberExpression(memberExpr, segments);
+                ParseMemberExpression(memberExpr, segments, pendingFilter);
                 break;
 
             case MethodCallExpression methodCallExpr:
-                ParseMethodCallExpression(methodCallExpr, segments);
+                ParseMethodCallExpression(methodCallExpr, segments, pendingFilter);
                 break;
 
             case ParameterExpression:
@@ -41,7 +41,7 @@ internal static class PathParser
 
             case UnaryExpression unaryExpr when unaryExpr.NodeType == ExpressionType.Convert:
                 // Handle type conversions
-                ParseExpression(unaryExpr.Operand, segments);
+                ParseExpression(unaryExpr.Operand, segments, pendingFilter);
                 break;
 
             default:
@@ -51,7 +51,7 @@ internal static class PathParser
         }
     }
 
-    private static void ParseMemberExpression(MemberExpression memberExpr, List<PathSegment> segments)
+    private static void ParseMemberExpression(MemberExpression memberExpr, List<PathSegment> segments, LambdaExpression? pendingFilter)
     {
         if (memberExpr.Member is not PropertyInfo propertyInfo)
         {
@@ -65,35 +65,45 @@ internal static class PathParser
         var targetType = propertyInfo.PropertyType;
         var isCollection = IsCollectionType(targetType, out var elementType);
 
+        // Apply pending filter if this is a collection
+        if (pendingFilter is not null && !isCollection)
+        {
+            throw new InvalidOperationException(
+                $"Where() can only be applied to collection navigation properties. " +
+                $"'{propertyInfo.Name}' is not a collection.");
+        }
+
         segments.Add(new PathSegment
         {
             Property = propertyInfo,
             IsCollection = isCollection,
             SourceType = sourceType,
-            TargetType = isCollection ? elementType! : targetType
+            TargetType = isCollection ? elementType! : targetType,
+            Filter = pendingFilter
         });
 
-        // Continue parsing the chain
+        // Continue parsing the chain (no pending filter for previous segments)
         if (memberExpr.Expression is not null)
         {
-            ParseExpression(memberExpr.Expression, segments);
+            ParseExpression(memberExpr.Expression, segments, pendingFilter: null);
         }
     }
 
-    private static void ParseMethodCallExpression(MethodCallExpression methodCallExpr, List<PathSegment> segments)
+    private static void ParseMethodCallExpression(MethodCallExpression methodCallExpr, List<PathSegment> segments, LambdaExpression? pendingFilter)
     {
         // Check if this is an Each() call (for collections)
         if (methodCallExpr.Method.Name == "Each" &&
             methodCallExpr.Method.DeclaringType == typeof(CollectionExtensions))
         {
             // Each() is just a marker - continue parsing the collection expression
+            // Pass along any pending filter
             if (methodCallExpr.Arguments.Count > 0)
             {
-                ParseExpression(methodCallExpr.Arguments[0], segments);
+                ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter);
             }
             else if (methodCallExpr.Object is not null)
             {
-                ParseExpression(methodCallExpr.Object, segments);
+                ParseExpression(methodCallExpr.Object, segments, pendingFilter);
             }
         }
         // Check if this is a To() call (for nullable navigations)
@@ -103,19 +113,47 @@ internal static class PathParser
             // To() is just a marker - continue parsing the navigation expression
             if (methodCallExpr.Arguments.Count > 0)
             {
-                ParseExpression(methodCallExpr.Arguments[0], segments);
+                ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter);
             }
             else if (methodCallExpr.Object is not null)
             {
-                ParseExpression(methodCallExpr.Object, segments);
+                ParseExpression(methodCallExpr.Object, segments, pendingFilter);
             }
+        }
+        // Check if this is a Where() call (for filtered includes)
+        else if (methodCallExpr.Method.Name == "Where" && IsLinqWhereMethod(methodCallExpr.Method))
+        {
+            // Extract the filter predicate (second argument)
+            if (methodCallExpr.Arguments.Count < 2)
+            {
+                throw new InvalidOperationException("Where() call must have a predicate argument.");
+            }
+
+            var filterArg = methodCallExpr.Arguments[1];
+            var filter = filterArg switch
+            {
+                UnaryExpression { NodeType: ExpressionType.Quote, Operand: LambdaExpression lambda } => lambda,
+                LambdaExpression lambda => lambda,
+                _ => throw new InvalidOperationException(
+                    $"Where() predicate must be a lambda expression. Found: {filterArg.NodeType}")
+            };
+
+            // Continue parsing from the collection (first argument), with the filter pending
+            ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter: filter);
         }
         else
         {
             throw new InvalidOperationException(
                 $"Unsupported method call '{methodCallExpr.Method.Name}' in include path. " +
-                "Only property access, Each(), and To() calls are supported.");
+                "Only property access, Each(), To(), and Where() calls are supported.");
         }
+    }
+
+    private static bool IsLinqWhereMethod(MethodInfo method)
+    {
+        // Check if this is System.Linq.Enumerable.Where or System.Linq.Queryable.Where
+        var declaringType = method.DeclaringType;
+        return declaringType == typeof(Enumerable) || declaringType == typeof(Queryable);
     }
 
     private static bool IsCollectionType(Type type, out Type? elementType)

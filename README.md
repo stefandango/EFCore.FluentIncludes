@@ -86,6 +86,38 @@ When your path goes through a collection, use `Each()` to indicate "for each ite
 
 > **Note:** `Each()` is just a marker - it tells the library "this is a collection, continue through it." It generates the same SQL as standard EF Core includes.
 
+### Filtered Collections: The `Where()` Method
+
+Filter collections during eager loading using standard LINQ `Where()`:
+
+```csharp
+// Only load active line items
+.IncludePaths(o => o.LineItems.Where(li => li.IsActive).Each())
+
+// Filter and continue the path
+.IncludePaths(o => o.LineItems.Where(li => li.Quantity > 0).Each().Product)
+
+// Filter at any collection level
+.IncludePaths(o => o.LineItems.Each().Product.To().Images.Where(i => i.IsPrimary).Each())
+```
+
+This generates EF Core's filtered includes, loading only matching items from the database.
+
+**Common use cases:**
+
+```csharp
+// Only published posts
+.IncludePaths(b => b.Posts.Where(p => p.IsPublished).Each().Comments)
+
+// Recent orders only
+.IncludePaths(c => c.Orders.Where(o => o.Date >= cutoffDate).Each().Items)
+
+// Primary images only
+.IncludePaths(p => p.Images.Where(i => i.IsPrimary).Each())
+```
+
+> **Note:** EF Core allows only one unique filter per navigation in a single query. If you need different subsets, use separate queries.
+
 ### Nullable Navigations: The `To()` Method
 
 When navigating through nullable properties, use `To()` to indicate "navigate to this property":
@@ -299,6 +331,7 @@ var orders = await context.Orders
 | `IncludePaths(paths...)` | Include one or more navigation paths |
 | `IncludePathsIf(condition, paths...)` | Include paths only when condition is true |
 | `Each()` | Navigate through a collection in a path |
+| `Where(predicate).Each()` | Filter a collection before navigating through it |
 | `To()` | Navigate through a nullable property in a path |
 | `WithSpec<TEntity, TSpec>()` | Apply a reusable specification |
 | `WithSpecs<TEntity, TSpec1, TSpec2>()` | Apply multiple specifications |
@@ -312,6 +345,7 @@ var orders = await context.Orders
 |----------|------------------|-------------------|
 | Nested property | `.Include(o => o.Customer).ThenInclude(c => c.Address)` | `.IncludePaths(o => o.Customer.To().Address)` |
 | Through collection | `.Include(o => o.Items).ThenInclude(i => i.Product)` | `.IncludePaths(o => o.Items.Each().Product)` |
+| Filtered collection | `.Include(o => o.Items.Where(i => i.Active)).ThenInclude(i => i.Product)` | `.IncludePaths(o => o.Items.Where(i => i.Active).Each().Product)` |
 | Deep nesting | 4+ lines of Include/ThenInclude | `.IncludePaths(o => o.Items.Each().Product.To().Category.To().Parent)` |
 | Multiple branches | Repeat Include chain for each branch | List all paths in one `IncludePaths()` call |
 

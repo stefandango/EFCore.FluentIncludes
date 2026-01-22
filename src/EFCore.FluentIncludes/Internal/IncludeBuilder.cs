@@ -92,13 +92,18 @@ internal static class IncludeBuilder
             var segment = segments[i];
             var isFirst = i == 0;
 
-            // Build the lambda expression for this segment
-            var lambdaExpression = BuildPropertyLambda(segment.SourceType, segment.Property);
+            // Build the lambda expression for this segment (with optional filter)
+            var lambdaExpression = BuildPropertyLambda(segment.SourceType, segment.Property, segment.Filter);
+
+            // Determine the result type (filtered collections remain IEnumerable<T>)
+            var resultType = segment.Filter is not null
+                ? typeof(IEnumerable<>).MakeGenericType(segment.TargetType)
+                : segment.Property.PropertyType;
 
             if (isFirst)
             {
                 // Use Include for the first segment
-                var includeMethodGeneric = IncludeMethod.MakeGenericMethod(entityType, segment.Property.PropertyType);
+                var includeMethodGeneric = IncludeMethod.MakeGenericMethod(entityType, resultType);
                 currentQuery = includeMethodGeneric.Invoke(null, [currentQuery, lambdaExpression])!;
             }
             else
@@ -113,7 +118,7 @@ internal static class IncludeBuilder
                     thenIncludeMethod = ThenIncludeAfterCollectionMethod.MakeGenericMethod(
                         entityType,
                         segment.SourceType,
-                        segment.Property.PropertyType);
+                        resultType);
                 }
                 else
                 {
@@ -121,23 +126,52 @@ internal static class IncludeBuilder
                     thenIncludeMethod = ThenIncludeAfterReferenceMethod.MakeGenericMethod(
                         entityType,
                         previousPropertyType!,
-                        segment.Property.PropertyType);
+                        resultType);
                 }
 
                 currentQuery = thenIncludeMethod.Invoke(null, [currentQuery, lambdaExpression])!;
             }
 
             previousWasCollection = segment.IsCollection;
-            previousPropertyType = segment.Property.PropertyType;
+            previousPropertyType = resultType;
         }
 
         return (IQueryable<TEntity>)currentQuery;
     }
 
-    private static LambdaExpression BuildPropertyLambda(Type sourceType, PropertyInfo property)
+    private static LambdaExpression BuildPropertyLambda(Type sourceType, PropertyInfo property, LambdaExpression? filter)
     {
         var parameter = Expression.Parameter(sourceType, "x");
-        var propertyAccess = Expression.Property(parameter, property);
-        return Expression.Lambda(propertyAccess, parameter);
+        Expression body = Expression.Property(parameter, property);
+
+        // If there's a filter, wrap the property access in a Where() call
+        if (filter is not null)
+        {
+            // Get the element type from the collection
+            var collectionType = property.PropertyType;
+            if (!IsEnumerableType(collectionType))
+            {
+                throw new InvalidOperationException(
+                    $"Cannot apply filter to non-collection property '{property.Name}'.");
+            }
+
+            var elementType = collectionType.GetInterfaces()
+                .Concat([collectionType])
+                .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+                .GetGenericArguments()[0];
+
+            // Find the Enumerable.Where method
+            var whereMethod = typeof(Enumerable)
+                .GetMethods()
+                .First(m => m.Name == "Where"
+                            && m.GetParameters().Length == 2
+                            && m.GetParameters()[1].ParameterType.GetGenericTypeDefinition() == typeof(Func<,>))
+                .MakeGenericMethod(elementType);
+
+            // Call Where(collection, filter)
+            body = Expression.Call(whereMethod, body, filter);
+        }
+
+        return Expression.Lambda(body, parameter);
     }
 }
