@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
-    <!-- Target Framework -->
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- Language Version -->
     <LangVersion>latest</LangVersion>
 
     <!-- Language Features -->
