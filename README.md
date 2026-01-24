@@ -512,6 +512,69 @@ Benchmarks run automatically in CI with a 50% overhead threshold to catch regres
 
 - Full compatibility with `AsSplitQuery()` and `AsSingleQuery()`
 
+---
+
+## Compile-Time Analysis
+
+EFCore.FluentIncludes includes a Roslyn analyzer that validates your include expressions at compile time, catching errors before they become runtime exceptions.
+
+### What It Catches
+
+The analyzer runs automatically when you install the package and provides immediate feedback in your IDE:
+
+| ID | Severity | Description |
+|----|----------|-------------|
+| `FI0001` | Error | Property does not exist on type |
+| `FI0002` | Error | Missing `Each()` on collection navigation |
+| `FI0003` | Error | `Each()` used on non-collection property |
+| `FI0004` | Error | `Where()` applied to non-collection |
+| `FI0005` | Error | `OrderBy()` applied to non-collection |
+| `FI0006` | Warning | `To()` used on non-nullable property (unnecessary) |
+| `FI0007` | Warning | Nullable navigation without `To()` or `!` |
+| `FI0008` | Error | Invalid property in filter predicate |
+| `FI0009` | Error | Type mismatch in navigation chain |
+
+### Examples
+
+```csharp
+// FI0001 - Typo in property name
+.IncludePaths(o => o.Custmer.To().Address)  // Error: Property 'Custmer' does not exist
+
+// FI0002 - Forgot Each() on collection
+.IncludePaths(o => o.LineItems.Product)  // Error: Collection requires .Each()
+
+// FI0007 - Nullable navigation without To()
+.IncludePaths(o => o.Customer.Address)  // Warning: Use .To() or ! for nullable navigation
+```
+
+### Auto-Fixes
+
+The analyzer includes code fixes for common issues. In your IDE, hover over the warning and use the lightbulb menu:
+
+- **FI0006** (unnecessary `To()`) → Remove `.To()`
+- **FI0007** (missing `To()`) → Add `.To()` after nullable property
+
+### Configuration
+
+Suppress warnings in `.editorconfig` if needed:
+
+```ini
+# Suppress specific rules
+[*.cs]
+dotnet_diagnostic.FI0006.severity = none  # Allow To() on non-nullable
+dotnet_diagnostic.FI0007.severity = none  # Don't require To() on nullable
+```
+
+Or suppress inline:
+
+```csharp
+#pragma warning disable FI0007
+.IncludePaths(o => o.Customer.Address)
+#pragma warning restore FI0007
+```
+
+---
+
 ## License
 
 Apache 2.0 - See [LICENSE](LICENSE) for details.
