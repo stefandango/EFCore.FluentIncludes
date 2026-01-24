@@ -25,4 +25,19 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
   </ItemGroup>
 
+  <!-- Include analyzer in the package -->
+  <ItemGroup>
+    <ProjectReference Include="..\EFCore.FluentIncludes.Analyzers\EFCore.FluentIncludes.Analyzers.csproj"
+                      PrivateAssets="all"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!-- Pack analyzer DLL into the analyzers folder -->
+  <ItemGroup>
+    <None Include="..\EFCore.FluentIncludes.Analyzers\bin\$(Configuration)\netstandard2.0\EFCore.FluentIncludes.Analyzers.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+  </ItemGroup>
+
 </Project>

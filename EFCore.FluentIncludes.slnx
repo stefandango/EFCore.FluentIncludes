@@ -1,9 +1,11 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/EFCore.FluentIncludes/EFCore.FluentIncludes.csproj" />
+    <Project Path="src/EFCore.FluentIncludes.Analyzers/EFCore.FluentIncludes.Analyzers.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EFCore.FluentIncludes.Tests/EFCore.FluentIncludes.Tests.csproj" />
     <Project Path="tests/EFCore.FluentIncludes.Benchmarks/EFCore.FluentIncludes.Benchmarks.csproj" />
+    <Project Path="tests/EFCore.FluentIncludes.Analyzers.Tests/EFCore.FluentIncludes.Analyzers.Tests.csproj" />
   </Folder>
 </Solution>
