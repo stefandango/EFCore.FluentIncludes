@@ -85,6 +85,54 @@ public abstract class IncludeSpec<TEntity> where TEntity : class
     }
 
     /// <summary>
+    /// Includes multiple navigation paths branching from a common base path.
+    /// This reduces repetition when multiple paths share the same prefix, especially with filtered collections.
+    /// </summary>
+    /// <typeparam name="TNav">The navigation type at the end of the base path. For collections, use <see cref="CollectionExtensions.Each{T}(IEnumerable{T})"/> to get the element type.</typeparam>
+    /// <param name="basePath">The base path expression. For collections, end with .Each(); for nullable references, optionally use .To().</param>
+    /// <param name="subPaths">One or more sub-path expressions starting from the base path's target type.</param>
+    /// <returns>This specification for chaining.</returns>
+    /// <example>
+    /// <code>
+    /// public class OrderDetailsSpec : IncludeSpec&lt;Order&gt;
+    /// {
+    ///     public OrderDetailsSpec()
+    ///     {
+    ///         IncludeFrom(
+    ///             o => o.LineItems.Where(li => li.IsActive).Each(),
+    ///             li => li.Product!.Category,
+    ///             li => li.Discounts.Each().Promotion);
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    protected IncludeSpec<TEntity> IncludeFrom<TNav>(
+        Expression<Func<TEntity, TNav>> basePath,
+        params Expression<Func<TNav, object?>>[] subPaths)
+    {
+        if (subPaths.Length == 0)
+        {
+            // No sub-paths, just include the base path itself
+            var baseOnlyPath = PathParser.Parse(basePath);
+            _paths.Add(baseOnlyPath);
+            return this;
+        }
+
+        var baseSegments = PathParser.Parse(basePath);
+
+        foreach (var subPath in subPaths)
+        {
+            var subSegments = PathParser.Parse(subPath);
+            var combinedPath = new List<PathSegment>(baseSegments.Count + subSegments.Count);
+            combinedPath.AddRange(baseSegments);
+            combinedPath.AddRange(subSegments);
+            _paths.Add(combinedPath);
+        }
+
+        return this;
+    }
+
+    /// <summary>
     /// Applies this specification to a queryable.
     /// </summary>
     /// <param name="query">The queryable to apply includes to.</param>

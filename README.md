@@ -309,6 +309,102 @@ var order = await context.Orders
 
 ---
 
+## Grouping Paths with `IncludeFrom`
+
+When multiple paths share the same base (especially with filters), use `IncludeFrom` to avoid repetition:
+
+```csharp
+// Instead of repeating the filter:
+context.Orders.IncludePaths(
+    o => o.LineItems.Where(li => li.IsActive).Each().Product,
+    o => o.LineItems.Where(li => li.IsActive).Each().Discounts,
+    o => o.LineItems.Where(li => li.IsActive).Each().Supplier)
+
+// Use IncludeFrom - define the base once:
+context.Orders.IncludeFrom(
+    o => o.LineItems.Where(li => li.IsActive).Each(),
+    li => li.Product,
+    li => li.Discounts.Each(),
+    li => li.Supplier.To().Address)
+```
+
+### Reference Navigations
+
+Group paths from a reference navigation:
+
+```csharp
+context.Orders.IncludeFrom(
+    o => o.Customer.To(),
+    c => c.Address,
+    c => c.PaymentMethods.Each())
+```
+
+### Multiple Groups
+
+Chain multiple `IncludeFrom` calls:
+
+```csharp
+context.Orders
+    .IncludeFrom(
+        o => o.Customer.To(),
+        c => c.Address,
+        c => c.PaymentMethods.Each())
+    .IncludeFrom(
+        o => o.LineItems.Where(li => li.IsActive).Each(),
+        li => li.Product!.Category,
+        li => li.Discounts.Each())
+    .IncludeFrom(
+        o => o.Payments.Each(),
+        p => p.PaymentMethod)
+```
+
+### Nested Filters in Sub-paths
+
+Sub-paths support full nesting including filters:
+
+```csharp
+context.Orders.IncludeFrom(
+    o => o.LineItems.Where(li => li.IsActive).Each(),
+    li => li.Product!.Images.Where(i => i.IsPrimary).Each(),
+    li => li.Product!.Tags.Where(t => t.Tag == "featured").Each())
+```
+
+### In Specifications
+
+Use `IncludeFrom` in specs for clean, grouped includes:
+
+```csharp
+public class OrderDetailsSpec : IncludeSpec<Order>
+{
+    public OrderDetailsSpec()
+    {
+        IncludeFrom(
+            o => o.Customer.To(),
+            c => c.Address,
+            c => c.PaymentMethods.Each());
+
+        IncludeFrom(
+            o => o.LineItems.Each(),
+            li => li.Product!.Category,
+            li => li.Discounts.Each());
+    }
+}
+```
+
+### Conditional
+
+Use `IncludeFromIf` for conditional grouped includes:
+
+```csharp
+context.Orders
+    .IncludeFromIf(includeProducts,
+        o => o.LineItems.Each(),
+        li => li.Product,
+        li => li.Discounts.Each())
+```
+
+---
+
 ## Split Queries
 
 Works with `AsSplitQuery()` to avoid cartesian explosion:
@@ -330,6 +426,8 @@ var orders = await context.Orders
 |--------|---------|
 | `IncludePaths(paths...)` | Include one or more navigation paths |
 | `IncludePathsIf(condition, paths...)` | Include paths only when condition is true |
+| `IncludeFrom(basePath, subPaths...)` | Group multiple paths from a common base |
+| `IncludeFromIf(condition, basePath, subPaths...)` | Conditional grouped includes |
 | `Each()` | Navigate through a collection in a path |
 | `Where(predicate).Each()` | Filter a collection before navigating through it |
 | `To()` | Navigate through a nullable property in a path |
@@ -348,6 +446,7 @@ var orders = await context.Orders
 | Filtered collection | `.Include(o => o.Items.Where(i => i.Active)).ThenInclude(i => i.Product)` | `.IncludePaths(o => o.Items.Where(i => i.Active).Each().Product)` |
 | Deep nesting | 4+ lines of Include/ThenInclude | `.IncludePaths(o => o.Items.Each().Product.To().Category.To().Parent)` |
 | Multiple branches | Repeat Include chain for each branch | List all paths in one `IncludePaths()` call |
+| Grouped paths | Repeat filter for each sub-path | `.IncludeFrom(base, subPath1, subPath2, ...)` |
 
 ---
 
