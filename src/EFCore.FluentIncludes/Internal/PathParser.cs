@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -11,13 +12,27 @@ internal static class PathParser
     private static readonly HashSet<string> OrderingMethodNames = ["OrderBy", "OrderByDescending", "ThenBy", "ThenByDescending"];
 
     /// <summary>
+    /// Cache for parsed expressions to avoid re-parsing the same expression structure.
+    /// Uses structural equality comparison for expression keys.
+    /// </summary>
+    private static readonly ConcurrentDictionary<LambdaExpression, List<PathSegment>> Cache = new(ExpressionEqualityComparer.Instance);
+
+    /// <summary>
     /// Parses a lambda expression and extracts the navigation path segments.
+    /// Results are cached for repeated calls with structurally identical expressions.
     /// </summary>
     /// <typeparam name="TEntity">The root entity type.</typeparam>
     /// <typeparam name="TProperty">The final property type.</typeparam>
     /// <param name="pathExpression">The path expression to parse.</param>
     /// <returns>A list of path segments representing the navigation path.</returns>
     public static List<PathSegment> Parse<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> pathExpression)
+    {
+        var cached = Cache.GetOrAdd(pathExpression, static expr => ParseCore(expr));
+        // Return a copy since callers may modify the list
+        return [.. cached];
+    }
+
+    private static List<PathSegment> ParseCore(LambdaExpression pathExpression)
     {
         var segments = new List<PathSegment>();
         ParseExpression(pathExpression.Body, segments, pendingFilter: null, pendingOrderings: null);

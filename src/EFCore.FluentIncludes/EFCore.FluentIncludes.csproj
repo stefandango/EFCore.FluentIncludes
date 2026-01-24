@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
-    <Version>1.0.0-preview.4</Version>
+    <Version>1.0.0-preview.5</Version>
     <PackageId>EFCore.FluentIncludes</PackageId>
     <Description>Simplify Entity Framework Core Include chains with path-based syntax and reusable specifications</Description>
     <PackageTags>efcore;entityframework;include;linq;orm</PackageTags>
