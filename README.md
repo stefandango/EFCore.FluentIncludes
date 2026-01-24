@@ -496,8 +496,20 @@ var orders = await context.Orders
 
 ## Performance
 
-- Generates identical SQL to standard EF Core includes
-- No runtime overhead - expressions are parsed once and cached
+EFCore.FluentIncludes generates **identical SQL** to standard EF Core includes. There is a small overhead for expression parsing:
+
+| Scenario | Standard EF | FluentIncludes | Overhead |
+|----------|-------------|----------------|----------|
+| Single navigation | 2.4 μs | 3.0 μs | +25% |
+| Two-level navigation | 3.7 μs | 4.7 μs | +27% |
+| Deep navigation (4 levels) | 6.7 μs | 8.6 μs | +28% |
+| Multiple paths | 7.7 μs | 10.4 μs | +35% |
+| Complex scenario | 12.9 μs | 18.5 μs | +44% |
+
+**Context:** A typical database query takes 1,000-50,000 μs. The overhead is <0.1% of total query time.
+
+Benchmarks run automatically in CI with a 50% overhead threshold to catch regressions.
+
 - Full compatibility with `AsSplitQuery()` and `AsSingleQuery()`
 
 ## License

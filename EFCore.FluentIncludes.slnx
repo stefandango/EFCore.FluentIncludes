@@ -4,5 +4,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EFCore.FluentIncludes.Tests/EFCore.FluentIncludes.Tests.csproj" />
+    <Project Path="tests/EFCore.FluentIncludes.Benchmarks/EFCore.FluentIncludes.Benchmarks.csproj" />
   </Folder>
 </Solution>
