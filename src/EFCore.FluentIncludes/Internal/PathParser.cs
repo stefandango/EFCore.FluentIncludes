@@ -8,6 +8,8 @@ namespace EFCore.FluentIncludes.Internal;
 /// </summary>
 internal static class PathParser
 {
+    private static readonly HashSet<string> OrderingMethodNames = ["OrderBy", "OrderByDescending", "ThenBy", "ThenByDescending"];
+
     /// <summary>
     /// Parses a lambda expression and extracts the navigation path segments.
     /// </summary>
@@ -18,21 +20,25 @@ internal static class PathParser
     public static List<PathSegment> Parse<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> pathExpression)
     {
         var segments = new List<PathSegment>();
-        ParseExpression(pathExpression.Body, segments, pendingFilter: null);
+        ParseExpression(pathExpression.Body, segments, pendingFilter: null, pendingOrderings: null);
         segments.Reverse(); // Segments are collected in reverse order
         return segments;
     }
 
-    private static void ParseExpression(Expression expression, List<PathSegment> segments, LambdaExpression? pendingFilter)
+    private static void ParseExpression(
+        Expression expression,
+        List<PathSegment> segments,
+        LambdaExpression? pendingFilter,
+        List<OrderingInfo>? pendingOrderings)
     {
         switch (expression)
         {
             case MemberExpression memberExpr:
-                ParseMemberExpression(memberExpr, segments, pendingFilter);
+                ParseMemberExpression(memberExpr, segments, pendingFilter, pendingOrderings);
                 break;
 
             case MethodCallExpression methodCallExpr:
-                ParseMethodCallExpression(methodCallExpr, segments, pendingFilter);
+                ParseMethodCallExpression(methodCallExpr, segments, pendingFilter, pendingOrderings);
                 break;
 
             case ParameterExpression:
@@ -41,7 +47,7 @@ internal static class PathParser
 
             case UnaryExpression unaryExpr when unaryExpr.NodeType == ExpressionType.Convert:
                 // Handle type conversions
-                ParseExpression(unaryExpr.Operand, segments, pendingFilter);
+                ParseExpression(unaryExpr.Operand, segments, pendingFilter, pendingOrderings);
                 break;
 
             default:
@@ -51,7 +57,11 @@ internal static class PathParser
         }
     }
 
-    private static void ParseMemberExpression(MemberExpression memberExpr, List<PathSegment> segments, LambdaExpression? pendingFilter)
+    private static void ParseMemberExpression(
+        MemberExpression memberExpr,
+        List<PathSegment> segments,
+        LambdaExpression? pendingFilter,
+        List<OrderingInfo>? pendingOrderings)
     {
         if (memberExpr.Member is not PropertyInfo propertyInfo)
         {
@@ -65,11 +75,18 @@ internal static class PathParser
         var targetType = propertyInfo.PropertyType;
         var isCollection = IsCollectionType(targetType, out var elementType);
 
-        // Apply pending filter if this is a collection
+        // Apply pending filter/orderings only to collections
         if (pendingFilter is not null && !isCollection)
         {
             throw new InvalidOperationException(
                 $"Where() can only be applied to collection navigation properties. " +
+                $"'{propertyInfo.Name}' is not a collection.");
+        }
+
+        if (pendingOrderings is not null && !isCollection)
+        {
+            throw new InvalidOperationException(
+                $"OrderBy() can only be applied to collection navigation properties. " +
                 $"'{propertyInfo.Name}' is not a collection.");
         }
 
@@ -79,31 +96,36 @@ internal static class PathParser
             IsCollection = isCollection,
             SourceType = sourceType,
             TargetType = isCollection ? elementType! : targetType,
-            Filter = pendingFilter
+            Filter = pendingFilter,
+            Orderings = pendingOrderings
         });
 
-        // Continue parsing the chain (no pending filter for previous segments)
+        // Continue parsing the chain (no pending filter/orderings for previous segments)
         if (memberExpr.Expression is not null)
         {
-            ParseExpression(memberExpr.Expression, segments, pendingFilter: null);
+            ParseExpression(memberExpr.Expression, segments, pendingFilter: null, pendingOrderings: null);
         }
     }
 
-    private static void ParseMethodCallExpression(MethodCallExpression methodCallExpr, List<PathSegment> segments, LambdaExpression? pendingFilter)
+    private static void ParseMethodCallExpression(
+        MethodCallExpression methodCallExpr,
+        List<PathSegment> segments,
+        LambdaExpression? pendingFilter,
+        List<OrderingInfo>? pendingOrderings)
     {
         // Check if this is an Each() call (for collections)
         if (methodCallExpr.Method.Name == "Each" &&
             methodCallExpr.Method.DeclaringType == typeof(CollectionExtensions))
         {
             // Each() is just a marker - continue parsing the collection expression
-            // Pass along any pending filter
+            // Pass along any pending filter/orderings
             if (methodCallExpr.Arguments.Count > 0)
             {
-                ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter);
+                ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter, pendingOrderings);
             }
             else if (methodCallExpr.Object is not null)
             {
-                ParseExpression(methodCallExpr.Object, segments, pendingFilter);
+                ParseExpression(methodCallExpr.Object, segments, pendingFilter, pendingOrderings);
             }
         }
         // Check if this is a To() call (for nullable navigations)
@@ -113,11 +135,11 @@ internal static class PathParser
             // To() is just a marker - continue parsing the navigation expression
             if (methodCallExpr.Arguments.Count > 0)
             {
-                ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter);
+                ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter, pendingOrderings);
             }
             else if (methodCallExpr.Object is not null)
             {
-                ParseExpression(methodCallExpr.Object, segments, pendingFilter);
+                ParseExpression(methodCallExpr.Object, segments, pendingFilter, pendingOrderings);
             }
         }
         // Check if this is a Where() call (for filtered includes)
@@ -139,19 +161,57 @@ internal static class PathParser
             };
 
             // Continue parsing from the collection (first argument), with the filter pending
-            ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter: filter);
+            // Orderings come after Where, so pass them along
+            ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter: filter, pendingOrderings);
+        }
+        // Check if this is an ordering method call (OrderBy, OrderByDescending, ThenBy, ThenByDescending)
+        else if (OrderingMethodNames.Contains(methodCallExpr.Method.Name) && IsLinqOrderingMethod(methodCallExpr.Method))
+        {
+            // Extract the key selector (second argument)
+            if (methodCallExpr.Arguments.Count < 2)
+            {
+                throw new InvalidOperationException($"{methodCallExpr.Method.Name}() call must have a key selector argument.");
+            }
+
+            var keySelectorArg = methodCallExpr.Arguments[1];
+            var keySelector = keySelectorArg switch
+            {
+                UnaryExpression { NodeType: ExpressionType.Quote, Operand: LambdaExpression lambda } => lambda,
+                LambdaExpression lambda => lambda,
+                _ => throw new InvalidOperationException(
+                    $"{methodCallExpr.Method.Name}() key selector must be a lambda expression. Found: {keySelectorArg.NodeType}")
+            };
+
+            var isDescending = methodCallExpr.Method.Name is "OrderByDescending" or "ThenByDescending";
+            var ordering = new OrderingInfo(keySelector, isDescending);
+
+            // Orderings are collected in reverse order (we parse from end to start)
+            // so we prepend to maintain correct order
+            var orderings = pendingOrderings is null
+                ? [ordering]
+                : pendingOrderings.Prepend(ordering).ToList();
+
+            // Continue parsing from the collection (first argument)
+            ParseExpression(methodCallExpr.Arguments[0], segments, pendingFilter, pendingOrderings: orderings);
         }
         else
         {
             throw new InvalidOperationException(
                 $"Unsupported method call '{methodCallExpr.Method.Name}' in include path. " +
-                "Only property access, Each(), To(), and Where() calls are supported.");
+                "Only property access, Each(), To(), Where(), and ordering methods (OrderBy, OrderByDescending, ThenBy, ThenByDescending) are supported.");
         }
     }
 
     private static bool IsLinqWhereMethod(MethodInfo method)
     {
         // Check if this is System.Linq.Enumerable.Where or System.Linq.Queryable.Where
+        var declaringType = method.DeclaringType;
+        return declaringType == typeof(Enumerable) || declaringType == typeof(Queryable);
+    }
+
+    private static bool IsLinqOrderingMethod(MethodInfo method)
+    {
+        // Check if this is System.Linq.Enumerable or System.Linq.Queryable ordering method
         var declaringType = method.DeclaringType;
         return declaringType == typeof(Enumerable) || declaringType == typeof(Queryable);
     }

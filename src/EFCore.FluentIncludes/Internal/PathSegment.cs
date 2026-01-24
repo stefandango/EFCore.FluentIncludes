@@ -4,6 +4,11 @@ using System.Reflection;
 namespace EFCore.FluentIncludes.Internal;
 
 /// <summary>
+/// Represents ordering information for a collection navigation.
+/// </summary>
+internal sealed record OrderingInfo(LambdaExpression KeySelector, bool Descending);
+
+/// <summary>
 /// Represents a single segment in a navigation path.
 /// </summary>
 internal sealed class PathSegment
@@ -18,4 +23,10 @@ internal sealed class PathSegment
     /// Only applicable when IsCollection is true.
     /// </summary>
     public LambdaExpression? Filter { get; init; }
+
+    /// <summary>
+    /// Optional ordering expressions for ordered includes (e.g., OrderBy(x => x.Name)).
+    /// Only applicable when IsCollection is true. Applied after Filter if both are present.
+    /// </summary>
+    public IReadOnlyList<OrderingInfo>? Orderings { get; init; }
 }

@@ -92,13 +92,26 @@ internal static class IncludeBuilder
             var segment = segments[i];
             var isFirst = i == 0;
 
-            // Build the lambda expression for this segment (with optional filter)
-            var lambdaExpression = BuildPropertyLambda(segment.SourceType, segment.Property, segment.Filter);
+            // Build the lambda expression for this segment (with optional filter and orderings)
+            var lambdaExpression = BuildPropertyLambda(segment.SourceType, segment.Property, segment.Filter, segment.Orderings);
 
-            // Determine the result type (filtered collections remain IEnumerable<T>)
-            var resultType = segment.Filter is not null
-                ? typeof(IEnumerable<>).MakeGenericType(segment.TargetType)
-                : segment.Property.PropertyType;
+            // Determine the result type based on what transformations are applied
+            Type resultType;
+            if (segment.Orderings is { Count: > 0 })
+            {
+                // Orderings produce IOrderedEnumerable<T>
+                resultType = typeof(IOrderedEnumerable<>).MakeGenericType(segment.TargetType);
+            }
+            else if (segment.Filter is not null)
+            {
+                // Filter produces IEnumerable<T>
+                resultType = typeof(IEnumerable<>).MakeGenericType(segment.TargetType);
+            }
+            else
+            {
+                // No transformation, use the original property type
+                resultType = segment.Property.PropertyType;
+            }
 
             if (isFirst)
             {
@@ -139,37 +152,80 @@ internal static class IncludeBuilder
         return (IQueryable<TEntity>)currentQuery;
     }
 
-    private static LambdaExpression BuildPropertyLambda(Type sourceType, PropertyInfo property, LambdaExpression? filter)
+    private static LambdaExpression BuildPropertyLambda(
+        Type sourceType,
+        PropertyInfo property,
+        LambdaExpression? filter,
+        IReadOnlyList<OrderingInfo>? orderings)
     {
         var parameter = Expression.Parameter(sourceType, "x");
         Expression body = Expression.Property(parameter, property);
 
-        // If there's a filter, wrap the property access in a Where() call
-        if (filter is not null)
+        // Get element type if this is a collection (needed for filter/ordering)
+        Type? elementType = null;
+        if (filter is not null || orderings is { Count: > 0 })
         {
-            // Get the element type from the collection
             var collectionType = property.PropertyType;
             if (!IsEnumerableType(collectionType))
             {
                 throw new InvalidOperationException(
-                    $"Cannot apply filter to non-collection property '{property.Name}'.");
+                    $"Cannot apply filter or ordering to non-collection property '{property.Name}'.");
             }
 
-            var elementType = collectionType.GetInterfaces()
+            elementType = collectionType.GetInterfaces()
                 .Concat([collectionType])
                 .First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>))
                 .GetGenericArguments()[0];
+        }
 
+        // If there's a filter, wrap the property access in a Where() call
+        if (filter is not null)
+        {
             // Find the Enumerable.Where method
             var whereMethod = typeof(Enumerable)
                 .GetMethods()
                 .First(m => m.Name == "Where"
                             && m.GetParameters().Length == 2
                             && m.GetParameters()[1].ParameterType.GetGenericTypeDefinition() == typeof(Func<,>))
-                .MakeGenericMethod(elementType);
+                .MakeGenericMethod(elementType!);
 
             // Call Where(collection, filter)
             body = Expression.Call(whereMethod, body, filter);
+        }
+
+        // If there are orderings, apply them in sequence
+        if (orderings is { Count: > 0 })
+        {
+            for (int i = 0; i < orderings.Count; i++)
+            {
+                var ordering = orderings[i];
+                var isFirst = i == 0;
+
+                // Determine method name based on position and direction
+                var methodName = (isFirst, ordering.Descending) switch
+                {
+                    (true, false) => "OrderBy",
+                    (true, true) => "OrderByDescending",
+                    (false, false) => "ThenBy",
+                    (false, true) => "ThenByDescending"
+                };
+
+                // Get the key type from the key selector
+                var keyType = ordering.KeySelector.ReturnType;
+
+                // Find the appropriate Enumerable method
+                // For OrderBy/OrderByDescending, source is IEnumerable<T>
+                // For ThenBy/ThenByDescending, source is IOrderedEnumerable<T>
+                var orderMethod = typeof(Enumerable)
+                    .GetMethods()
+                    .First(m => m.Name == methodName
+                                && m.GetParameters().Length == 2
+                                && m.GetParameters()[1].ParameterType.IsGenericType
+                                && m.GetParameters()[1].ParameterType.GetGenericTypeDefinition() == typeof(Func<,>))
+                    .MakeGenericMethod(elementType!, keyType);
+
+                body = Expression.Call(orderMethod, body, ordering.KeySelector);
+            }
         }
 
         return Expression.Lambda(body, parameter);

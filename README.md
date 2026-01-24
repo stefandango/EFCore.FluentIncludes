@@ -118,6 +118,48 @@ This generates EF Core's filtered includes, loading only matching items from the
 
 > **Note:** EF Core allows only one unique filter per navigation in a single query. If you need different subsets, use separate queries.
 
+### Ordered Collections: The `OrderBy()` Method
+
+Order collections during eager loading using standard LINQ ordering methods:
+
+```csharp
+// Order line items by creation date
+.IncludePaths(o => o.LineItems.OrderBy(li => li.CreatedAt).Each())
+
+// Descending order
+.IncludePaths(o => o.LineItems.OrderByDescending(li => li.CreatedAt).Each())
+
+// Order and continue the path
+.IncludePaths(o => o.LineItems.OrderBy(li => li.DisplayOrder).Each().Product)
+
+// Order at any collection level
+.IncludePaths(o => o.LineItems.Each().Product.To().Images.OrderBy(i => i.SortOrder).Each())
+```
+
+**Multiple sort criteria** using `ThenBy` and `ThenByDescending`:
+
+```csharp
+// Primary sort, then secondary sort
+.IncludePaths(o => o.LineItems
+    .OrderBy(li => li.Category)
+    .ThenByDescending(li => li.DisplayOrder)
+    .Each()
+    .Product)
+```
+
+**Combined with filtering** - filter first, then order:
+
+```csharp
+// Filter to active items, then order them
+.IncludePaths(o => o.LineItems
+    .Where(li => li.IsActive)
+    .OrderBy(li => li.DisplayOrder)
+    .Each()
+    .Product)
+```
+
+This generates EF Core's ordered includes, controlling the order of loaded items.
+
 ### Nullable Navigations: The `To()` Method
 
 When navigating through nullable properties, use `To()` to indicate "navigate to this property":
@@ -430,6 +472,7 @@ var orders = await context.Orders
 | `IncludeFromIf(condition, basePath, subPaths...)` | Conditional grouped includes |
 | `Each()` | Navigate through a collection in a path |
 | `Where(predicate).Each()` | Filter a collection before navigating through it |
+| `OrderBy(keySelector).Each()` | Order a collection before navigating through it |
 | `To()` | Navigate through a nullable property in a path |
 | `WithSpec<TEntity, TSpec>()` | Apply a reusable specification |
 | `WithSpecs<TEntity, TSpec1, TSpec2>()` | Apply multiple specifications |
@@ -444,6 +487,7 @@ var orders = await context.Orders
 | Nested property | `.Include(o => o.Customer).ThenInclude(c => c.Address)` | `.IncludePaths(o => o.Customer.To().Address)` |
 | Through collection | `.Include(o => o.Items).ThenInclude(i => i.Product)` | `.IncludePaths(o => o.Items.Each().Product)` |
 | Filtered collection | `.Include(o => o.Items.Where(i => i.Active)).ThenInclude(i => i.Product)` | `.IncludePaths(o => o.Items.Where(i => i.Active).Each().Product)` |
+| Ordered collection | `.Include(o => o.Items.OrderBy(i => i.Date)).ThenInclude(i => i.Product)` | `.IncludePaths(o => o.Items.OrderBy(i => i.Date).Each().Product)` |
 | Deep nesting | 4+ lines of Include/ThenInclude | `.IncludePaths(o => o.Items.Each().Product.To().Category.To().Parent)` |
 | Multiple branches | Repeat Include chain for each branch | List all paths in one `IncludePaths()` call |
 | Grouped paths | Repeat filter for each sub-path | `.IncludeFrom(base, subPath1, subPath2, ...)` |
