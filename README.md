@@ -500,13 +500,36 @@ EFCore.FluentIncludes generates **identical SQL** to standard EF Core includes. 
 
 | Scenario | Standard EF | FluentIncludes | Overhead |
 |----------|-------------|----------------|----------|
-| Single navigation | 2.4 μs | 3.0 μs | +25% |
-| Two-level navigation | 3.7 μs | 4.7 μs | +27% |
-| Deep navigation (4 levels) | 6.7 μs | 8.6 μs | +28% |
-| Multiple paths | 7.7 μs | 10.4 μs | +35% |
-| Complex scenario | 12.9 μs | 18.5 μs | +44% |
+| Single navigation | 2.3 μs | 3.1 μs | +31% |
+| Two-level navigation | 3.7 μs | 4.9 μs | +34% |
+| Deep navigation (4 levels) | 6.2 μs | 9.0 μs | +44% |
+| Multiple paths | 7.6 μs | 10.9 μs | +44% |
+| Complex scenario | 13.0 μs | 18.8 μs | +44% |
 
 **Context:** A typical database query takes 1,000-50,000 μs. The overhead is <0.1% of total query time.
+
+### .NET 10 Source Generation
+
+On **.NET 10**, EFCore.FluentIncludes uses C# interceptors to generate direct `Include`/`ThenInclude` calls at compile time, eliminating runtime expression parsing entirely.
+
+**How it works:**
+- The source generator analyzes your `IncludePaths` calls during compilation
+- For inline lambdas, it generates interceptors that call EF Core directly
+- For expressions stored in variables, it falls back to runtime parsing with caching
+
+**What you get:**
+- Zero runtime reflection or expression parsing for inline lambdas
+- Generated code is visible in `obj/Generated/` when `EmitCompilerGeneratedFiles` is enabled
+- Automatic fallback ensures all scenarios work correctly
+
+**Framework behavior:**
+
+| Framework | Behavior |
+|-----------|----------|
+| .NET 10+ | Source-generated interceptors (eliminates parsing overhead) |
+| .NET 8/9 | Runtime expression parsing with caching (existing behavior) |
+
+No configuration required - the source generator activates automatically on .NET 10+.
 
 Benchmarks run automatically in CI with a 50% overhead threshold to catch regressions.
 

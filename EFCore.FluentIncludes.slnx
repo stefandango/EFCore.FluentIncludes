@@ -7,6 +7,7 @@
     <Project Path="tests/EFCore.FluentIncludes.Tests/EFCore.FluentIncludes.Tests.csproj" />
     <Project Path="tests/EFCore.FluentIncludes.Benchmarks/EFCore.FluentIncludes.Benchmarks.csproj" />
     <Project Path="tests/EFCore.FluentIncludes.Analyzers.Tests/EFCore.FluentIncludes.Analyzers.Tests.csproj" />
+    <Project Path="tests/EFCore.FluentIncludes.Generator.Tests/EFCore.FluentIncludes.Generator.Tests.csproj" />
   </Folder>
   <Folder Name="/samples/">
     <Project Path="samples/EFCore.FluentIncludes.Sample/EFCore.FluentIncludes.Sample.csproj" />

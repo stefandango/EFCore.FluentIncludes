@@ -17,8 +17,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
     <PackageId>EFCore.FluentIncludes.Analyzers</PackageId>
-    <Version>1.0.0-preview.1</Version>
-    <Description>Roslyn analyzers for EFCore.FluentIncludes - compile-time validation of navigation paths</Description>
+    <Version>1.0.1</Version>
+    <Description>Roslyn analyzers and source generators for EFCore.FluentIncludes - compile-time validation and optimization of navigation paths. On .NET 10+, generates direct Include/ThenInclude calls eliminating runtime expression parsing.</Description>
     <PackageTags>efcore;entityframework;analyzer;roslyn</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>

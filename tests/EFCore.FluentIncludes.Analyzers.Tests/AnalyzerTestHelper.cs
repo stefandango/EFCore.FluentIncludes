@@ -90,6 +90,33 @@ public static class AnalyzerTestHelper
             {
                 public static T Each<T>(this IEnumerable<T> source) => throw new InvalidOperationException();
                 public static T Each<T>(this ICollection<T> source) => throw new InvalidOperationException();
+
+                // Where for filtered includes (returns collection type for chaining)
+                public static IEnumerable<T> Where<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+                    => throw new InvalidOperationException();
+                public static ICollection<T> Where<T>(this ICollection<T> source, Func<T, bool> predicate)
+                    => throw new InvalidOperationException();
+
+                // OrderBy for ordered includes (returns collection type for chaining)
+                public static IEnumerable<T> OrderBy<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector)
+                    => throw new InvalidOperationException();
+                public static ICollection<T> OrderBy<T, TKey>(this ICollection<T> source, Func<T, TKey> keySelector)
+                    => throw new InvalidOperationException();
+
+                public static IEnumerable<T> OrderByDescending<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector)
+                    => throw new InvalidOperationException();
+                public static ICollection<T> OrderByDescending<T, TKey>(this ICollection<T> source, Func<T, TKey> keySelector)
+                    => throw new InvalidOperationException();
+
+                public static IEnumerable<T> ThenBy<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector)
+                    => throw new InvalidOperationException();
+                public static ICollection<T> ThenBy<T, TKey>(this ICollection<T> source, Func<T, TKey> keySelector)
+                    => throw new InvalidOperationException();
+
+                public static IEnumerable<T> ThenByDescending<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector)
+                    => throw new InvalidOperationException();
+                public static ICollection<T> ThenByDescending<T, TKey>(this ICollection<T> source, Func<T, TKey> keySelector)
+                    => throw new InvalidOperationException();
             }
 
             public static class NavigationExtensions

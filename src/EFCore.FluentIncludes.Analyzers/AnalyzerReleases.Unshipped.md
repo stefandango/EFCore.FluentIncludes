@@ -11,3 +11,5 @@ FI0006 | EFCore.FluentIncludes | Warning | Unnecessary To()
 FI0007 | EFCore.FluentIncludes | Warning | Missing To() on nullable navigation
 FI0008 | EFCore.FluentIncludes | Error | Invalid property in filter
 FI0009 | EFCore.FluentIncludes | Error | Type mismatch in navigation
+FI1001 | EFCore.FluentIncludes | Disabled | Include path generated
+FI1002 | EFCore.FluentIncludes | Disabled | Include path uses runtime fallback

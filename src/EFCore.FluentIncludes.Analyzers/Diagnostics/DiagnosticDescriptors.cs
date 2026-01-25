@@ -116,4 +116,32 @@ public static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         description: "The navigation chain has a type mismatch that would cause a runtime error.");
+
+    // ============================================================================
+    // Source Generator Diagnostics (FI1xxx)
+    // ============================================================================
+
+    /// <summary>
+    /// FI1001: Include path successfully generated (informational).
+    /// </summary>
+    public static readonly DiagnosticDescriptor IncludePathGenerated = new(
+        id: "FI1001",
+        title: "Include path generated",
+        messageFormat: "Include path '{0}' was source-generated for zero-overhead execution",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: false,
+        description: "The FluentIncludes source generator successfully generated direct Include/ThenInclude calls for this expression, eliminating runtime expression parsing overhead.");
+
+    /// <summary>
+    /// FI1002: Include path uses runtime fallback (informational).
+    /// </summary>
+    public static readonly DiagnosticDescriptor IncludePathFallback = new(
+        id: "FI1002",
+        title: "Include path uses runtime fallback",
+        messageFormat: "Include path uses runtime parsing: {0}",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Info,
+        isEnabledByDefault: false,
+        description: "The FluentIncludes source generator could not generate code for this expression. It will use runtime expression parsing instead, which is still fast due to caching.");
 }

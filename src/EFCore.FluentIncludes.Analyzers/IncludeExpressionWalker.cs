@@ -79,6 +79,7 @@ internal sealed class IncludeExpressionWalker
         public bool IsNullable { get; set; }
         public string? MethodName { get; set; }
         public LambdaExpressionSyntax? Predicate { get; set; }
+        public ITypeSymbol? CastTargetType { get; set; }
     }
 
     private enum SegmentKind
@@ -90,6 +91,7 @@ internal sealed class IncludeExpressionWalker
         WhereCall,
         OrderingCall,
         NullForgiving,
+        Cast,
         Unknown
     }
 
@@ -135,7 +137,13 @@ internal sealed class IncludeExpressionWalker
                     break;
 
                 case CastExpressionSyntax cast:
-                    // Type cast - continue with inner expression
+                    // Type cast - track for FI0009 validation
+                    var castTypeInfo = _context.SemanticModel.GetTypeInfo(cast.Type, _context.CancellationToken);
+                    yield return new PathSegmentInfo(cast, SegmentKind.Cast)
+                    {
+                        CastTargetType = castTypeInfo.Type,
+                        TargetType = castTypeInfo.Type
+                    };
                     current = cast.Expression;
                     break;
 
@@ -271,6 +279,21 @@ internal sealed class IncludeExpressionWalker
                     // ! operator doesn't change collection state
                     break;
 
+                case SegmentKind.Cast:
+                    // FI0009: Validate cast type is compatible with current type
+                    ValidateCast(segment, currentType);
+                    // Update current type to the cast target type
+                    if (segment.CastTargetType != null)
+                    {
+                        currentType = segment.CastTargetType;
+                        currentIsCollection = IsCollectionType(segment.CastTargetType);
+                        if (currentIsCollection)
+                        {
+                            lastCollectionSegment = segment;
+                        }
+                    }
+                    break;
+
                 case SegmentKind.WhereCall:
                     ValidateFilterCall(segment, currentIsCollection, "Where");
                     if (segment.Predicate != null && currentType != null)
@@ -367,6 +390,91 @@ internal sealed class IncludeExpressionWalker
                 segment.Node.GetLocation(),
                 methodName));
         }
+    }
+
+    private void ValidateCast(PathSegmentInfo segment, ITypeSymbol? sourceType)
+    {
+        // FI0009: Validate that the cast target type is related to the source type
+        if (sourceType == null || segment.CastTargetType == null)
+        {
+            return;
+        }
+
+        var targetType = segment.CastTargetType;
+
+        // Check if target type derives from source type (downcast - valid)
+        // or source type derives from target type (upcast - valid)
+        // or they share a common base class/interface (potentially valid)
+        if (!AreTypesRelated(sourceType, targetType))
+        {
+            _context.ReportDiagnostic(Diagnostic.Create(
+                DiagnosticDescriptors.TypeMismatch,
+                segment.Node.GetLocation(),
+                sourceType.Name,
+                targetType.Name));
+        }
+    }
+
+    private static bool AreTypesRelated(ITypeSymbol type1, ITypeSymbol type2)
+    {
+        // Same type
+        if (SymbolEqualityComparer.Default.Equals(type1, type2))
+        {
+            return true;
+        }
+
+        // Strip nullable annotation for comparison
+        var unwrapped1 = type1.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
+        var unwrapped2 = type2.WithNullableAnnotation(NullableAnnotation.NotAnnotated);
+
+        if (SymbolEqualityComparer.Default.Equals(unwrapped1, unwrapped2))
+        {
+            return true;
+        }
+
+        // Check inheritance hierarchy - type1 derives from type2
+        if (DerivesFrom(type1, type2))
+        {
+            return true;
+        }
+
+        // Check inheritance hierarchy - type2 derives from type1
+        if (DerivesFrom(type2, type1))
+        {
+            return true;
+        }
+
+        // Check for interface implementation
+        if (type2.TypeKind == TypeKind.Interface && type1.AllInterfaces.Any(i =>
+            SymbolEqualityComparer.Default.Equals(i, type2) ||
+            SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, type2.OriginalDefinition)))
+        {
+            return true;
+        }
+
+        if (type1.TypeKind == TypeKind.Interface && type2.AllInterfaces.Any(i =>
+            SymbolEqualityComparer.Default.Equals(i, type1) ||
+            SymbolEqualityComparer.Default.Equals(i.OriginalDefinition, type1.OriginalDefinition)))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool DerivesFrom(ITypeSymbol derived, ITypeSymbol baseType)
+    {
+        var current = derived.BaseType;
+        while (current != null)
+        {
+            if (SymbolEqualityComparer.Default.Equals(current, baseType) ||
+                SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, baseType.OriginalDefinition))
+            {
+                return true;
+            }
+            current = current.BaseType;
+        }
+        return false;
     }
 
     private void ValidateFilterPredicate(LambdaExpressionSyntax predicate, ITypeSymbol elementType)
