@@ -1,5 +1,7 @@
 # EFCore.FluentIncludes
 
+[![codecov](https://codecov.io/gh/stefandango/EFCore.FluentIncludes/graph/badge.svg)](https://codecov.io/gh/stefandango/EFCore.FluentIncludes)
+
 Simplify Entity Framework Core `Include`/`ThenInclude` chains with clean, readable path-based syntax.
 
 ## Why?
