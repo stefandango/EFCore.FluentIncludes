@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using EFCore.FluentIncludes.Internal;
+using Microsoft.EntityFrameworkCore;
 
 namespace EFCore.FluentIncludes;
 
@@ -26,6 +27,9 @@ namespace EFCore.FluentIncludes;
 public abstract class IncludeSpec<TEntity> where TEntity : class
 {
     private readonly List<List<PathSegment>> _paths = [];
+    private bool _useSplitQuery;
+    private bool _asNoTracking;
+    private bool _asNoTrackingWithIdentityResolution;
 
     /// <summary>
     /// Gets the parsed paths defined in this specification.
@@ -133,12 +137,71 @@ public abstract class IncludeSpec<TEntity> where TEntity : class
     }
 
     /// <summary>
+    /// Configures the specification to use split queries.
+    /// When applied, the query will execute as multiple SQL queries instead of a single query with JOINs.
+    /// This can improve performance when loading entities with multiple collection navigations.
+    /// </summary>
+    /// <returns>This specification for chaining.</returns>
+    /// <remarks>
+    /// Split queries avoid the "cartesian explosion" problem that can occur when loading multiple
+    /// collection navigations in a single query. However, they require multiple database round-trips.
+    /// </remarks>
+    protected IncludeSpec<TEntity> UseSplitQuery()
+    {
+        _useSplitQuery = true;
+        return this;
+    }
+
+    /// <summary>
+    /// Configures the specification to disable change tracking.
+    /// Entities returned by the query will not be tracked by the DbContext.
+    /// </summary>
+    /// <returns>This specification for chaining.</returns>
+    /// <remarks>
+    /// Use this for read-only scenarios to improve performance. Changes to returned entities
+    /// will not be persisted when SaveChanges is called.
+    /// </remarks>
+    protected IncludeSpec<TEntity> AsNoTracking()
+    {
+        _asNoTracking = true;
+        _asNoTrackingWithIdentityResolution = false;
+        return this;
+    }
+
+    /// <summary>
+    /// Configures the specification to disable change tracking but preserve identity resolution.
+    /// Entities returned by the query will not be tracked, but duplicate entities in the result
+    /// will resolve to the same instance.
+    /// </summary>
+    /// <returns>This specification for chaining.</returns>
+    /// <remarks>
+    /// This is useful when you need read-only entities but want to maintain referential integrity
+    /// within the result set (e.g., multiple orders referencing the same customer).
+    /// </remarks>
+    protected IncludeSpec<TEntity> AsNoTrackingWithIdentityResolution()
+    {
+        _asNoTrackingWithIdentityResolution = true;
+        _asNoTracking = false;
+        return this;
+    }
+
+    /// <summary>
     /// Applies this specification to a queryable.
     /// </summary>
     /// <param name="query">The queryable to apply includes to.</param>
     /// <returns>The queryable with includes applied.</returns>
     public IQueryable<TEntity> Apply(IQueryable<TEntity> query)
     {
-        return IncludeBuilder.ApplyIncludes(query, _paths);
+        query = IncludeBuilder.ApplyIncludes(query, _paths);
+
+        if (_useSplitQuery)
+            query = query.AsSplitQuery();
+
+        if (_asNoTracking)
+            query = query.AsNoTracking();
+        else if (_asNoTrackingWithIdentityResolution)
+            query = query.AsNoTrackingWithIdentityResolution();
+
+        return query;
     }
 }

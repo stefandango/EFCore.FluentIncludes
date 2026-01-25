@@ -88,6 +88,60 @@ public class CategoryWithParentsSpec : IncludeSpec<Category>
     }
 }
 
+/// <summary>
+/// Order spec with split query enabled.
+/// </summary>
+public class OrderWithSplitQuerySpec : IncludeSpec<Order>
+{
+    public OrderWithSplitQuerySpec()
+    {
+        UseSplitQuery();
+        Include(
+            o => o.Customer!.Address,
+            o => o.LineItems.Each().Product,
+            o => o.Payments.Each().PaymentMethod);
+    }
+}
+
+/// <summary>
+/// Order spec with no tracking enabled.
+/// </summary>
+public class OrderNoTrackingSpec : IncludeSpec<Order>
+{
+    public OrderNoTrackingSpec()
+    {
+        AsNoTracking();
+        Include(o => o.Customer!.Address);
+    }
+}
+
+/// <summary>
+/// Order spec with no tracking but identity resolution.
+/// </summary>
+public class OrderNoTrackingWithIdentityResolutionSpec : IncludeSpec<Order>
+{
+    public OrderNoTrackingWithIdentityResolutionSpec()
+    {
+        AsNoTrackingWithIdentityResolution();
+        Include(o => o.Customer!.Address);
+    }
+}
+
+/// <summary>
+/// Order spec combining split query and no tracking.
+/// </summary>
+public class OrderSplitQueryNoTrackingSpec : IncludeSpec<Order>
+{
+    public OrderSplitQueryNoTrackingSpec()
+    {
+        UseSplitQuery();
+        AsNoTracking();
+        Include(
+            o => o.Customer!.Address,
+            o => o.LineItems.Each().Product);
+    }
+}
+
 #endregion
 
 /// <summary>
@@ -294,5 +348,113 @@ public class IncludeSpecTests
         category.ParentCategory!.Name.Should().Be("Phones");
         category.ParentCategory.ParentCategory.Should().NotBeNull();
         category.ParentCategory.ParentCategory!.Name.Should().Be("Electronics");
+    }
+
+    [Fact]
+    public async Task SpecWithSplitQuery_AppliesSplitQueryBehavior()
+    {
+        // Arrange
+        await using var context = _fixture.CreateContext();
+
+        // Act - This spec has UseSplitQuery() configured
+        var order = await context.Orders
+            .WithSpec<Order, OrderWithSplitQuerySpec>()
+            .FirstOrDefaultAsync(o => o.Id == 1);
+
+        // Assert - Verify includes were loaded
+        order.Should().NotBeNull();
+        order!.Customer.Should().NotBeNull();
+        order.Customer!.Address.Should().NotBeNull();
+        order.LineItems.Should().HaveCount(2);
+        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
+        order.Payments.Should().HaveCount(1);
+        order.Payments.Should().AllSatisfy(p => p.PaymentMethod.Should().NotBeNull());
+    }
+
+    [Fact]
+    public async Task SpecWithNoTracking_EntitiesAreNotTracked()
+    {
+        // Arrange
+        await using var context = _fixture.CreateContext();
+
+        // Act - This spec has AsNoTracking() configured
+        var order = await context.Orders
+            .WithSpec<Order, OrderNoTrackingSpec>()
+            .FirstOrDefaultAsync(o => o.Id == 1);
+
+        // Assert - Verify data was loaded
+        order.Should().NotBeNull();
+        order!.Customer.Should().NotBeNull();
+        order.Customer!.Address.Should().NotBeNull();
+
+        // Verify entity is not tracked
+        var entry = context.Entry(order);
+        entry.State.Should().Be(EntityState.Detached);
+    }
+
+    [Fact]
+    public async Task SpecWithNoTrackingWithIdentityResolution_EntitiesAreNotTrackedButResolved()
+    {
+        // Arrange
+        await using var context = _fixture.CreateContext();
+
+        // Act - This spec has AsNoTrackingWithIdentityResolution() configured
+        var order = await context.Orders
+            .WithSpec<Order, OrderNoTrackingWithIdentityResolutionSpec>()
+            .FirstOrDefaultAsync(o => o.Id == 1);
+
+        // Assert - Verify data was loaded
+        order.Should().NotBeNull();
+        order!.Customer.Should().NotBeNull();
+
+        // Verify entity is not tracked
+        var entry = context.Entry(order);
+        entry.State.Should().Be(EntityState.Detached);
+    }
+
+    [Fact]
+    public async Task SpecWithSplitQueryAndNoTracking_AppliesBothBehaviors()
+    {
+        // Arrange
+        await using var context = _fixture.CreateContext();
+
+        // Act - This spec has both UseSplitQuery() and AsNoTracking() configured
+        var order = await context.Orders
+            .WithSpec<Order, OrderSplitQueryNoTrackingSpec>()
+            .FirstOrDefaultAsync(o => o.Id == 1);
+
+        // Assert - Verify includes were loaded
+        order.Should().NotBeNull();
+        order!.Customer.Should().NotBeNull();
+        order.Customer!.Address.Should().NotBeNull();
+        order.LineItems.Should().HaveCount(2);
+        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
+
+        // Verify entity is not tracked
+        var entry = context.Entry(order);
+        entry.State.Should().Be(EntityState.Detached);
+    }
+
+    [Fact]
+    public async Task SpecQueryOptions_CanBeCombinedWithExternalOptions()
+    {
+        // Arrange
+        await using var context = _fixture.CreateContext();
+
+        // Act - Spec has includes, we add AsSplitQuery externally
+        var order = await context.Orders
+            .WithSpec<Order, OrderWithItemsSpec>()
+            .AsSplitQuery()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(o => o.Id == 1);
+
+        // Assert - Verify data was loaded
+        order.Should().NotBeNull();
+        order!.LineItems.Should().HaveCount(2);
+        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
+
+        // Verify entity is not tracked
+        var entry = context.Entry(order);
+        entry.State.Should().Be(EntityState.Detached);
     }
 }

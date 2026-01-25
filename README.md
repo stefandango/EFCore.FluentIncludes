@@ -575,6 +575,17 @@ Or suppress inline:
 
 ---
 
+## Sample Project
+
+A complete sample ASP.NET Core Minimal API project is available in [`samples/EFCore.FluentIncludes.Sample`](samples/EFCore.FluentIncludes.Sample). It demonstrates all library features with an e-commerce domain (orders, customers, products, categories).
+
+```bash
+# Run the sample
+dotnet run --project samples/EFCore.FluentIncludes.Sample
+```
+
+---
+
 ## License
 
 Apache 2.0 - See [LICENSE](LICENSE) for details.

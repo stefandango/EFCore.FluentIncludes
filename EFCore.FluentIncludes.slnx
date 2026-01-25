@@ -8,4 +8,7 @@
     <Project Path="tests/EFCore.FluentIncludes.Benchmarks/EFCore.FluentIncludes.Benchmarks.csproj" />
     <Project Path="tests/EFCore.FluentIncludes.Analyzers.Tests/EFCore.FluentIncludes.Analyzers.Tests.csproj" />
   </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/EFCore.FluentIncludes.Sample/EFCore.FluentIncludes.Sample.csproj" />
+  </Folder>
 </Solution>
