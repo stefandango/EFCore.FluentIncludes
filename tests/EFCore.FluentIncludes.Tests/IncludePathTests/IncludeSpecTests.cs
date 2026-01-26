@@ -128,6 +128,17 @@ public class OrderNoTrackingWithIdentityResolutionSpec : IncludeSpec<Order>
 }
 
 /// <summary>
+/// Spec that includes from another spec instance.
+/// </summary>
+public class OrderFromInstanceSpec : IncludeSpec<Order>
+{
+    public OrderFromInstanceSpec(IncludeSpec<Order> otherSpec)
+    {
+        IncludeFrom(otherSpec);
+    }
+}
+
+/// <summary>
 /// Order spec combining split query and no tracking.
 /// </summary>
 public class OrderSplitQueryNoTrackingSpec : IncludeSpec<Order>
@@ -240,7 +251,7 @@ public class IncludeSpecTests
     }
 
     [Fact]
-    public async Task WithSpecs_CombinesMultipleSpecs()
+    public async Task WithSpecs_CombinesTwoSpecs()
     {
         // Arrange
         await using var context = _fixture.CreateContext();
@@ -256,6 +267,25 @@ public class IncludeSpecTests
         order.Customer!.Address.Should().NotBeNull();
         order.LineItems.Should().HaveCount(2);
         order.LineItems.First().Product.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task WithSpecs_CombinesThreeSpecs()
+    {
+        // Arrange
+        await using var context = _fixture.CreateContext();
+
+        // Act - Combine three specs at query time
+        var order = await context.Orders
+            .WithSpecs<Order, OrderSummarySpec, OrderWithItemsSpec, OrderAuditSpec>()
+            .FirstOrDefaultAsync(o => o.Id == 1);
+
+        // Assert
+        order.Should().NotBeNull();
+        order!.Customer.Should().NotBeNull(); // From OrderSummarySpec
+        order.LineItems.Should().HaveCount(2); // From OrderWithItemsSpec
+        order.LineItems.First().Product.Should().NotBeNull();
+        order.Notes.First().Author.Should().NotBeNull(); // From OrderAuditSpec
     }
 
     [Fact]
@@ -275,6 +305,25 @@ public class IncludeSpecTests
         order.Should().NotBeNull();
         order!.Customer.Should().NotBeNull();
         order.LineItems.Should().HaveCount(2);
+        order.LineItems.First().Product.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task IncludeFromInstance_CopiesPathsFromOtherSpec()
+    {
+        // Arrange
+        await using var context = _fixture.CreateContext();
+        var baseSpec = new OrderWithItemsSpec();
+        var derivedSpec = new OrderFromInstanceSpec(baseSpec);
+
+        // Act
+        var order = await context.Orders
+            .WithSpec(derivedSpec)
+            .FirstOrDefaultAsync(o => o.Id == 1);
+
+        // Assert
+        order.Should().NotBeNull();
+        order!.LineItems.Should().HaveCount(2);
         order.LineItems.First().Product.Should().NotBeNull();
     }
 

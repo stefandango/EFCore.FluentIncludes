@@ -108,6 +108,13 @@ public static class GeneratorTestHelper
                     Expression<Func<TEntity, TNav>> basePath,
                     params Expression<Func<TNav, object?>>[] subPaths) where TEntity : class
                     => source;
+
+                public static IQueryable<TEntity> IncludeFromIf<TEntity, TNav>(
+                    this IQueryable<TEntity> source,
+                    bool condition,
+                    Expression<Func<TEntity, TNav>> basePath,
+                    params Expression<Func<TNav, object?>>[] subPaths) where TEntity : class
+                    => source;
             }
 
             public static class CollectionExtensions

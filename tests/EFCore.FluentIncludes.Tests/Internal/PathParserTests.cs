@@ -294,29 +294,15 @@ public class PathParserTests
     }
 
     [Fact]
-    public void Parse_OrderByOnNonCollection_ThrowsInvalidOperationException()
+    public void Parse_UnsupportedMethodCall_ThrowsInvalidOperationException()
     {
-        // Manually construct OrderBy on a non-collection property
-        var param = Expression.Parameter(typeof(Order), "o");
-        var customerAccess = Expression.Property(param, "Customer");
+        // Create an expression with an unsupported method like Select()
+        Expression<Func<Order, IEnumerable<int>>> expr = o => o.LineItems.Select(li => li.Quantity);
 
-        // We can't easily construct this via C# syntax, so we verify via different means
-        // The error path is: pendingOrderings is not null && !isCollection
-        // This requires manually constructing the expression tree
-
-        // For now, verify the error message format
-        var action = () =>
-        {
-            // This should fail because we're trying to order a single navigation
-            // We need to construct: o => o.Customer (with pending orderings)
-            // But since Parse doesn't expose pendingOrderings, we test via indirect means
-            throw new InvalidOperationException(
-                "OrderBy() can only be applied to collection navigation properties. " +
-                "'Customer' is not a collection.");
-        };
+        var action = () => PathParser.Parse(expr);
 
         action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*OrderBy()*collection*");
+            .WithMessage("*Unsupported method call 'Select'*");
     }
 
     [Fact]
