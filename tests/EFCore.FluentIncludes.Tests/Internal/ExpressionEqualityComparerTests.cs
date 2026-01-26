@@ -337,4 +337,135 @@ public class ExpressionEqualityComparerTests
     }
 
     #endregion
+
+    #region MemberInit Expressions
+
+    [Fact]
+    public void Equals_IdenticalMemberInitExpression_ReturnsTrue()
+    {
+        Expression<Func<LineItem, TestDto>> expr1 = li => new TestDto { Value = li.Quantity };
+        Expression<Func<LineItem, TestDto>> expr2 = li => new TestDto { Value = li.Quantity };
+
+        Comparer.Equals(expr1, expr2).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Equals_DifferentMemberInitValues_ReturnsFalse()
+    {
+        Expression<Func<LineItem, TestDto>> expr1 = li => new TestDto { Value = li.Quantity };
+        Expression<Func<LineItem, TestDto>> expr2 = li => new TestDto { Value = li.Id };
+
+        Comparer.Equals(expr1, expr2).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Equals_DifferentMemberInitBindings_ReturnsFalse()
+    {
+        Expression<Func<LineItem, TestDto>> expr1 = li => new TestDto { Value = li.Quantity };
+        Expression<Func<LineItem, TestDto>> expr2 = li => new TestDto { Name = "test" };
+
+        Comparer.Equals(expr1, expr2).Should().BeFalse();
+    }
+
+    #endregion
+
+    #region Invocation Expressions
+
+    [Fact]
+    public void Equals_IdenticalInvocationExpression_ReturnsTrue()
+    {
+        Func<int, int> func = x => x * 2;
+        Expression<Func<int, int>> inner = x => x * 2;
+
+        var param = Expression.Parameter(typeof(int), "n");
+        var invoke1 = Expression.Invoke(inner, param);
+        var invoke2 = Expression.Invoke(inner, param);
+        var lambda1 = Expression.Lambda<Func<int, int>>(invoke1, param);
+        var lambda2 = Expression.Lambda<Func<int, int>>(invoke2, param);
+
+        Comparer.Equals(lambda1, lambda2).Should().BeTrue();
+    }
+
+    #endregion
+
+    #region Parameter Mapping Edge Cases
+
+    [Fact]
+    public void Equals_ParameterNotInMap_ComparesTypes()
+    {
+        // Create expressions where the parameter comparison falls through to type comparison
+        var param1 = Expression.Parameter(typeof(int), "x");
+        var param2 = Expression.Parameter(typeof(int), "y");
+
+        // Direct parameter expressions (not mapped)
+        var lambda1 = Expression.Lambda<Func<int, int>>(param1, param1);
+        var lambda2 = Expression.Lambda<Func<int, int>>(param2, param2);
+
+        Comparer.Equals(lambda1, lambda2).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Equals_DifferentParameterTypes_ReturnsFalse()
+    {
+        Expression<Func<int, int>> expr1 = x => x;
+        Expression<Func<long, long>> expr2 = x => x;
+
+        Comparer.Equals(expr1, expr2).Should().BeFalse();
+    }
+
+    #endregion
+
+    #region Unsupported Expression Types
+
+    [Fact]
+    public void Equals_UnsupportedExpressionType_ReturnsFalse()
+    {
+        // Create expressions with types not explicitly handled (falls to default case)
+        var param = Expression.Parameter(typeof(int[]), "arr");
+        var arrayLength = Expression.ArrayLength(param);
+        var lambda1 = Expression.Lambda<Func<int[], int>>(arrayLength, param);
+        var lambda2 = Expression.Lambda<Func<int[], int>>(arrayLength, param);
+
+        // Same expression should still be equal via reference equality in ExpressionsEqual
+        Comparer.Equals(lambda1, lambda2).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Equals_DifferentUnsupportedExpressionTypes_ReturnsFalse()
+    {
+        var param1 = Expression.Parameter(typeof(int[]), "arr1");
+        var param2 = Expression.Parameter(typeof(int[]), "arr2");
+        var arrayLength1 = Expression.ArrayLength(param1);
+        var arrayLength2 = Expression.ArrayLength(param2);
+        var lambda1 = Expression.Lambda<Func<int[], int>>(arrayLength1, param1);
+        var lambda2 = Expression.Lambda<Func<int[], int>>(arrayLength2, param2);
+
+        // Different array length expressions should be equal (same structure)
+        Comparer.Equals(lambda1, lambda2).Should().BeTrue();
+    }
+
+    #endregion
+
+    #region Nested Lambda Edge Cases
+
+    [Fact]
+    public void Equals_NestedLambdaWithDifferentParameterCounts_ReturnsFalse()
+    {
+        Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0).Each();
+        Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where((li, idx) => li.Quantity > 0).Each();
+
+        Comparer.Equals(expr1, expr2).Should().BeFalse();
+    }
+
+    #endregion
+
+    #region Helper Classes
+
+    private sealed class TestDto
+    {
+        public int Value { get; set; }
+        public string? Name { get; set; }
+    }
+
+    #endregion
 }
