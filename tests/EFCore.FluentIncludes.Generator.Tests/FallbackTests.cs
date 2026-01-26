@@ -97,4 +97,85 @@ public class FallbackTests
         var result = RunGenerator(source);
         result.Diagnostics.Should().BeEmpty();
     }
+
+    [Fact]
+    public void CastExpression_HandledGracefully()
+    {
+        var source = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(IQueryable<Order> orders)
+                {
+                    // Cast expression in the path
+                    var query = orders.IncludePaths(o => ((Customer)o.Customer!).Address);
+                }
+            }
+        }
+        """;
+
+        var result = RunGenerator(source);
+        result.Diagnostics.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void ParenthesizedExpression_HandledGracefully()
+    {
+        var source = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(IQueryable<Order> orders)
+                {
+                    // Parenthesized expression
+                    var query = orders.IncludePaths(o => ((o.Customer))!.Address);
+                }
+            }
+        }
+        """;
+
+        var result = RunGenerator(source);
+        result.Diagnostics.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void NullForgivingOperator_HandledGracefully()
+    {
+        var source = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(IQueryable<Order> orders)
+                {
+                    // Multiple null-forgiving operators
+                    var query = orders.IncludePaths(o => o.Customer!.Address!);
+                }
+            }
+        }
+        """;
+
+        var result = RunGenerator(source);
+        result.Diagnostics.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void CapturedVariable_InOrdering_FallsBackToRuntime()
+    {
+        var source = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(IQueryable<Order> orders, int threshold)
+                {
+                    // This captures 'threshold' in ordering - should fall back to runtime
+                    var query = orders.IncludePaths(
+                        o => o.LineItems.OrderBy(li => li.Id > threshold ? 1 : 0).Each());
+                }
+            }
+        }
+        """;
+
+        var result = RunGenerator(source);
+        result.Diagnostics.Should().BeEmpty();
+    }
 }

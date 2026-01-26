@@ -597,4 +597,187 @@ public class UncoveredPathsTests
     }
 
     #endregion
+
+    #region Parenthesized Expressions (line 134-137)
+
+    [Fact]
+    public async Task ParenthesizedExpression_NoDiagnostic()
+    {
+        var testCode = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(TestDbContext context)
+                {
+                    // Parenthesized expression
+                    var query = context.Orders.IncludePaths(o => ((o.Customer))!.Address);
+                }
+            }
+        }
+        """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
+
+    #region Array Types as Collections (line 518-521)
+
+    [Fact]
+    public async Task ArrayProperty_TreatedAsCollection()
+    {
+        var testCode = """
+            using System;
+            using System.Collections.Generic;
+            using System.Linq;
+            using System.Linq.Expressions;
+
+            namespace Microsoft.EntityFrameworkCore
+            {
+                public class DbContext { }
+                public abstract class DbSet<TEntity> : IQueryable<TEntity> where TEntity : class
+                {
+                    public Type ElementType => typeof(TEntity);
+                    public Expression Expression => Expression.Constant(this);
+                    public IQueryProvider Provider => null!;
+                    public IEnumerator<TEntity> GetEnumerator() => throw new NotImplementedException();
+                    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+                }
+            }
+
+            namespace EFCore.FluentIncludes
+            {
+                public static class QueryableExtensions
+                {
+                    public static IQueryable<TEntity> IncludePaths<TEntity>(
+                        this IQueryable<TEntity> source,
+                        params Expression<Func<TEntity, object?>>[] paths) where TEntity : class
+                        => source;
+                }
+
+                public static class CollectionExtensions
+                {
+                    public static T Each<T>(this T[] source) => throw new InvalidOperationException();
+                }
+            }
+
+            namespace TestNamespace
+            {
+                using EFCore.FluentIncludes;
+                using Microsoft.EntityFrameworkCore;
+
+                public class Order
+                {
+                    public int Id { get; set; }
+                    public LineItem[] Items { get; set; } = Array.Empty<LineItem>();
+                }
+
+                public class LineItem
+                {
+                    public int Id { get; set; }
+                    public Product? Product { get; set; }
+                }
+
+                public class Product
+                {
+                    public int Id { get; set; }
+                }
+
+                public class TestDbContext : DbContext
+                {
+                    public DbSet<Order> Orders { get; set; } = null!;
+                }
+
+                public class TestClass
+                {
+                    public void Test(TestDbContext context)
+                    {
+                        // Array property - should be treated as collection
+                        var query = context.Orders.IncludePaths(o => o.Items.Each().Product);
+                    }
+                }
+            }
+            """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
+
+    #region Interface Inheritance (line 448-460)
+
+    [Fact]
+    public async Task CastToInterface_NoDiagnostic()
+    {
+        var testCode = """
+            using System;
+            using System.Collections.Generic;
+            using System.Linq;
+            using System.Linq.Expressions;
+
+            namespace Microsoft.EntityFrameworkCore
+            {
+                public class DbContext { }
+                public abstract class DbSet<TEntity> : IQueryable<TEntity> where TEntity : class
+                {
+                    public Type ElementType => typeof(TEntity);
+                    public Expression Expression => Expression.Constant(this);
+                    public IQueryProvider Provider => null!;
+                    public IEnumerator<TEntity> GetEnumerator() => throw new NotImplementedException();
+                    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+                }
+            }
+
+            namespace EFCore.FluentIncludes
+            {
+                public static class QueryableExtensions
+                {
+                    public static IQueryable<TEntity> IncludePaths<TEntity>(
+                        this IQueryable<TEntity> source,
+                        params Expression<Func<TEntity, object?>>[] paths) where TEntity : class
+                        => source;
+                }
+            }
+
+            namespace TestNamespace
+            {
+                using EFCore.FluentIncludes;
+                using Microsoft.EntityFrameworkCore;
+
+                public interface IEntity
+                {
+                    int Id { get; }
+                }
+
+                public class Order : IEntity
+                {
+                    public int Id { get; set; }
+                    public Customer? Customer { get; set; }
+                }
+
+                public class Customer : IEntity
+                {
+                    public int Id { get; set; }
+                }
+
+                public class TestDbContext : DbContext
+                {
+                    public DbSet<Order> Orders { get; set; } = null!;
+                }
+
+                public class TestClass
+                {
+                    public void Test(TestDbContext context)
+                    {
+                        // Cast to interface
+                        var query = context.Orders.IncludePaths(o => (IEntity)o.Customer!);
+                    }
+                }
+            }
+            """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
 }
