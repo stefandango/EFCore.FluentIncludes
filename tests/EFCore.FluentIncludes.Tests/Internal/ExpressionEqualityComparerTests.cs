@@ -459,12 +459,134 @@ public class ExpressionEqualityComparerTests
 
     #endregion
 
+    #region MemberMemberBinding Tests
+
+    [Fact]
+    public void Equals_IdenticalMemberMemberBinding_ReturnsTrue()
+    {
+        // MemberMemberBinding is used for nested object initializers like:
+        // new Outer { Inner = { Property = value } }
+        Expression<Func<TestOuter>> expr1 = () => new TestOuter { Inner = { Value = 42 } };
+        Expression<Func<TestOuter>> expr2 = () => new TestOuter { Inner = { Value = 42 } };
+
+        Comparer.Equals(expr1, expr2).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Equals_DifferentMemberMemberBindingValue_ReturnsFalse()
+    {
+        Expression<Func<TestOuter>> expr1 = () => new TestOuter { Inner = { Value = 42 } };
+        Expression<Func<TestOuter>> expr2 = () => new TestOuter { Inner = { Value = 99 } };
+
+        Comparer.Equals(expr1, expr2).Should().BeFalse();
+    }
+
+    #endregion
+
+    #region MemberListBinding Tests
+
+    [Fact]
+    public void Equals_IdenticalMemberListBinding_ReturnsTrue()
+    {
+        // MemberListBinding is used for collection initializers like:
+        // new Container { Items = { item1, item2 } }
+        Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2, 3 } };
+        Expression<Func<TestContainer>> expr2 = () => new TestContainer { Items = { 1, 2, 3 } };
+
+        Comparer.Equals(expr1, expr2).Should().BeTrue();
+    }
+
+    [Fact]
+    public void Equals_DifferentMemberListBindingValues_ReturnsFalse()
+    {
+        Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2, 3 } };
+        Expression<Func<TestContainer>> expr2 = () => new TestContainer { Items = { 4, 5, 6 } };
+
+        Comparer.Equals(expr1, expr2).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Equals_DifferentMemberListBindingCount_ReturnsFalse()
+    {
+        Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2 } };
+        Expression<Func<TestContainer>> expr2 = () => new TestContainer { Items = { 1, 2, 3 } };
+
+        Comparer.Equals(expr1, expr2).Should().BeFalse();
+    }
+
+    #endregion
+
+    #region Different Binding Types
+
+    [Fact]
+    public void Equals_DifferentBindingTypes_ReturnsFalse()
+    {
+        // MemberAssignment vs MemberListBinding
+        Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2 } };
+        Expression<Func<TestContainerWithAssignment>> expr2 = () => new TestContainerWithAssignment { Items = new List<int> { 1, 2 } };
+
+        Comparer.Equals(expr1, expr2).Should().BeFalse();
+    }
+
+    #endregion
+
+    #region Hash Code for Complex Expressions
+
+    [Fact]
+    public void GetHashCode_MemberInitExpression_ReturnsConsistentHash()
+    {
+        Expression<Func<LineItem, TestDto>> expr1 = li => new TestDto { Value = li.Quantity };
+        Expression<Func<LineItem, TestDto>> expr2 = li => new TestDto { Value = li.Quantity };
+
+        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+    }
+
+    [Fact]
+    public void GetHashCode_MemberMemberBinding_ReturnsConsistentHash()
+    {
+        Expression<Func<TestOuter>> expr1 = () => new TestOuter { Inner = { Value = 42 } };
+        Expression<Func<TestOuter>> expr2 = () => new TestOuter { Inner = { Value = 42 } };
+
+        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+    }
+
+    [Fact]
+    public void GetHashCode_MemberListBinding_ReturnsConsistentHash()
+    {
+        Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2, 3 } };
+        Expression<Func<TestContainer>> expr2 = () => new TestContainer { Items = { 1, 2, 3 } };
+
+        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+    }
+
+    #endregion
+
     #region Helper Classes
 
     private sealed class TestDto
     {
         public int Value { get; set; }
         public string? Name { get; set; }
+    }
+
+    private sealed class TestInner
+    {
+        public int Value { get; set; }
+    }
+
+    private sealed class TestOuter
+    {
+        public TestInner Inner { get; set; } = new();
+    }
+
+    private sealed class TestContainer
+    {
+        public List<int> Items { get; } = [];
+    }
+
+    private sealed class TestContainerWithAssignment
+    {
+        public List<int> Items { get; set; } = [];
     }
 
     #endregion

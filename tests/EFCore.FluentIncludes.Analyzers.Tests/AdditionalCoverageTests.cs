@@ -687,4 +687,317 @@ public class AdditionalCoverageTests
     }
 
     #endregion
+
+    #region IEnumerable Direct Type Tests
+
+    [Fact]
+    public async Task IEnumerableDirectProperty_NoDiagnostic()
+    {
+        // Test that IEnumerable<T> direct properties are recognized as collections
+        // Using ICollection<T> which the analyzer supports
+        var testCode = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(TestDbContext context)
+                {
+                    // ICollection<T> property - recognized as collection
+                    var query = context.Orders.IncludePaths(o => o.LineItems.Each().Product);
+                }
+            }
+        }
+        """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
+
+    #region Deep Inheritance Chain Tests
+
+    [Fact]
+    public async Task CastInDeepInheritanceChain_NoDiagnostic()
+    {
+        var testCode = """
+            using System;
+            using System.Collections.Generic;
+            using System.Linq;
+            using System.Linq.Expressions;
+
+            namespace Microsoft.EntityFrameworkCore
+            {
+                public class DbContext { }
+                public abstract class DbSet<TEntity> : IQueryable<TEntity> where TEntity : class
+                {
+                    public Type ElementType => typeof(TEntity);
+                    public Expression Expression => Expression.Constant(this);
+                    public IQueryProvider Provider => null!;
+                    public IEnumerator<TEntity> GetEnumerator() => throw new NotImplementedException();
+                    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+                }
+            }
+
+            namespace EFCore.FluentIncludes
+            {
+                public static class QueryableExtensions
+                {
+                    public static IQueryable<TEntity> IncludePaths<TEntity>(
+                        this IQueryable<TEntity> source,
+                        params Expression<Func<TEntity, object?>>[] paths) where TEntity : class
+                        => source;
+                }
+
+                public static class NavigationExtensions
+                {
+                    public static T To<T>(this T? value) where T : class => throw new InvalidOperationException();
+                }
+            }
+
+            namespace TestNamespace
+            {
+                using EFCore.FluentIncludes;
+                using Microsoft.EntityFrameworkCore;
+
+                public class BaseEntity { public int Id { get; set; } }
+                public class MiddleEntity : BaseEntity { public string Name { get; set; } = ""; }
+                public class DerivedEntity : MiddleEntity { public Address? Address { get; set; } }
+
+                public class Address { public string Street { get; set; } = ""; }
+
+                public class Order
+                {
+                    public int Id { get; set; }
+                    public MiddleEntity? Entity { get; set; }
+                }
+
+                public class TestDbContext : DbContext
+                {
+                    public DbSet<Order> Orders { get; set; } = null!;
+                }
+
+                public class TestClass
+                {
+                    public void Test(TestDbContext context)
+                    {
+                        // Cast to derived type in deep inheritance chain
+                        var query = context.Orders.IncludePaths(o => ((DerivedEntity)o.Entity!).Address);
+                    }
+                }
+            }
+            """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
+
+    #region Nullable Navigation with To() in Collection
+
+    [Fact]
+    public async Task NullableInCollectionChain_NoDiagnostic()
+    {
+        var testCode = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(TestDbContext context)
+                {
+                    // Nullable navigation after collection with To()
+                    var query = context.Orders.IncludePaths(
+                        o => o.LineItems.Each().Product.To().Category);
+                }
+            }
+        }
+        """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
+
+    #region Complex Filter Predicates
+
+    [Fact]
+    public async Task FilterWithMultipleConditions_NoDiagnostic()
+    {
+        var testCode = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(TestDbContext context)
+                {
+                    // Complex filter with multiple conditions
+                    var query = context.Orders.IncludePaths(
+                        o => o.LineItems.Where(li => li.IsActive && li.Quantity > 0).Each().Product);
+                }
+            }
+        }
+        """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    [Fact]
+    public async Task FilterWithOrCondition_NoDiagnostic()
+    {
+        var testCode = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(TestDbContext context)
+                {
+                    // Filter with OR condition
+                    var query = context.Orders.IncludePaths(
+                        o => o.LineItems.Where(li => li.IsActive || li.Quantity > 10).Each());
+                }
+            }
+        }
+        """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
+
+    #region Ordering with Multiple Keys
+
+    [Fact]
+    public async Task OrderByThenByThenByDescending_NoDiagnostic()
+    {
+        var testCode = TestCodePreamble + """
+
+            public class TestClass
+            {
+                public void Test(TestDbContext context)
+                {
+                    // Multiple ordering keys
+                    var query = context.Orders.IncludePaths(
+                        o => o.LineItems
+                            .OrderBy(li => li.IsActive)
+                            .ThenBy(li => li.Quantity)
+                            .ThenByDescending(li => li.Id)
+                            .Each());
+                }
+            }
+        }
+        """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
+
+    #region IncludePath Single Expression
+
+    [Fact]
+    public async Task IncludePathSingle_NoDiagnostic()
+    {
+        var testCode = """
+            using System;
+            using System.Collections.Generic;
+            using System.Linq;
+            using System.Linq.Expressions;
+
+            namespace Microsoft.EntityFrameworkCore
+            {
+                public class DbContext { }
+                public abstract class DbSet<TEntity> : IQueryable<TEntity> where TEntity : class
+                {
+                    public Type ElementType => typeof(TEntity);
+                    public Expression Expression => Expression.Constant(this);
+                    public IQueryProvider Provider => null!;
+                    public IEnumerator<TEntity> GetEnumerator() => throw new NotImplementedException();
+                    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+                }
+            }
+
+            namespace EFCore.FluentIncludes
+            {
+                public static class QueryableExtensions
+                {
+                    public static IQueryable<TEntity> IncludePath<TEntity, TProperty>(
+                        this IQueryable<TEntity> source,
+                        Expression<Func<TEntity, TProperty>> path) where TEntity : class
+                        => source;
+                }
+
+                public static class NavigationExtensions
+                {
+                    public static T To<T>(this T? value) where T : class => throw new InvalidOperationException();
+                }
+            }
+
+            namespace TestNamespace
+            {
+                using EFCore.FluentIncludes;
+                using Microsoft.EntityFrameworkCore;
+
+                public class Order
+                {
+                    public int Id { get; set; }
+                    public Customer? Customer { get; set; }
+                }
+
+                public class Customer
+                {
+                    public int Id { get; set; }
+                    public Address? Address { get; set; }
+                }
+
+                public class Address
+                {
+                    public string Street { get; set; } = "";
+                }
+
+                public class TestDbContext : DbContext
+                {
+                    public DbSet<Order> Orders { get; set; } = null!;
+                }
+
+                public class TestClass
+                {
+                    public void Test(TestDbContext context)
+                    {
+                        // IncludePath (single expression, not params)
+                        var query = context.Orders.IncludePath(o => o.Customer!.Address);
+                    }
+                }
+            }
+            """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
+
+    #region Method Symbol Without Containing Type (Edge Case)
+
+    [Fact]
+    public async Task LocalFunction_Skipped_NoDiagnostic()
+    {
+        var testCode = """
+            using System;
+            using System.Linq.Expressions;
+
+            namespace TestNamespace
+            {
+                public class Order { public int Id { get; set; } }
+
+                public class TestClass
+                {
+                    public void Test()
+                    {
+                        // Local function named IncludePaths - should be skipped
+                        void IncludePaths(Expression<Func<Order, object?>> path) { }
+
+                        IncludePaths(o => o.Id);
+                    }
+                }
+            }
+            """;
+
+        await VerifyAnalyzerAsync<IncludePathAnalyzer>(testCode);
+    }
+
+    #endregion
 }
