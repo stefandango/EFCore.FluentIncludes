@@ -21,6 +21,11 @@
     <None Include="../../icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <!-- Expose internal types to test assembly -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="EFCore.FluentIncludes.Tests" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
