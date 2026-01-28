@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 using static EFCore.FluentIncludes.Generator.Tests.GeneratorTestHelper;
 
@@ -29,7 +29,7 @@ public class IncludeFromTests
         var result = RunGenerator(source);
 
         // The generator should run without errors
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class IncludeFromTests
 
         var result = RunGenerator(source);
 
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class IncludeFromTests
 
         var result = RunGenerator(source);
 
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class IncludeFromTests
 
         var result = RunGenerator(source);
 
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class IncludeFromTests
 
         var result = RunGenerator(source);
 
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -143,6 +143,6 @@ public class IncludeFromTests
 
         var result = RunGenerator(source);
 
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 }

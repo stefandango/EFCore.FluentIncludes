@@ -33,17 +33,13 @@ public class SplitQueryTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - all data should be loaded
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li =>
-        {
-            li.Product.Should().NotBeNull();
-            li.Product!.Category.Should().NotBeNull();
-        });
-        order.Payments.Should().HaveCount(1);
-        order.Payments.First().PaymentMethod.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null && li.Product.Category != null);
+        order.Payments.Count.ShouldBe(1);
+        order.Payments.First().PaymentMethod.ShouldNotBeNull();
     }
 
     [Fact]
@@ -62,11 +58,11 @@ public class SplitQueryTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - all data should be loaded
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.LineItems.Should().HaveCount(2);
-        order.Payments.Should().HaveCount(1);
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.LineItems.Count.ShouldBe(2);
+        order.Payments.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -82,11 +78,11 @@ public class SplitQueryTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - all data should be loaded
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.LineItems.Should().HaveCount(2);
-        order.Payments.Should().HaveCount(1);
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.LineItems.Count.ShouldBe(2);
+        order.Payments.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -104,10 +100,10 @@ public class SplitQueryTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.LineItems.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -137,22 +133,22 @@ public class SplitQueryTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - both should have identical data
-        singleQueryOrder.Should().NotBeNull();
-        splitQueryOrder.Should().NotBeNull();
+        singleQueryOrder.ShouldNotBeNull();
+        splitQueryOrder.ShouldNotBeNull();
 
         // Customer data
-        singleQueryOrder!.Customer!.Id.Should().Be(splitQueryOrder!.Customer!.Id);
-        singleQueryOrder.Customer.Address!.Id.Should().Be(splitQueryOrder.Customer.Address!.Id);
-        singleQueryOrder.Customer.PaymentMethods.Should().HaveCount(splitQueryOrder.Customer.PaymentMethods.Count);
+        singleQueryOrder!.Customer!.Id.ShouldBe(splitQueryOrder!.Customer!.Id);
+        singleQueryOrder.Customer.Address!.Id.ShouldBe(splitQueryOrder.Customer.Address!.Id);
+        singleQueryOrder.Customer.PaymentMethods.Count.ShouldBe(splitQueryOrder.Customer.PaymentMethods.Count);
 
         // LineItems data
-        singleQueryOrder.LineItems.Should().HaveCount(splitQueryOrder.LineItems.Count);
+        singleQueryOrder.LineItems.Count.ShouldBe(splitQueryOrder.LineItems.Count);
 
         var singleLineItem = singleQueryOrder.LineItems.First(li => li.Id == 1);
         var splitLineItem = splitQueryOrder.LineItems.First(li => li.Id == 1);
 
-        singleLineItem.Product!.Id.Should().Be(splitLineItem.Product!.Id);
-        singleLineItem.Product.Category!.Id.Should().Be(splitLineItem.Product.Category!.Id);
-        singleLineItem.Discounts.Should().HaveCount(splitLineItem.Discounts.Count);
+        singleLineItem.Product!.Id.ShouldBe(splitLineItem.Product!.Id);
+        singleLineItem.Product.Category!.Id.ShouldBe(splitLineItem.Product.Category!.Id);
+        singleLineItem.Discounts.Count.ShouldBe(splitLineItem.Discounts.Count);
     }
 }

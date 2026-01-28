@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 using static EFCore.FluentIncludes.Generator.Tests.GeneratorTestHelper;
 
@@ -27,7 +27,7 @@ public class SimplePathTests
         var result = RunGenerator(source);
 
         // The generator should run without errors
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
 
         // Check what was generated
         var generatedSource = GetGeneratedSource(result);
@@ -66,7 +66,7 @@ public class SimplePathTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class SimplePathTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class SimplePathTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -126,7 +126,7 @@ public class SimplePathTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class SimplePathTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -164,7 +164,7 @@ public class SimplePathTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -183,6 +183,6 @@ public class SimplePathTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 }

@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 using static EFCore.FluentIncludes.Generator.Tests.GeneratorTestHelper;
 
@@ -28,7 +28,7 @@ public class FallbackTests
         var result = RunGenerator(source);
 
         // Generator should run without errors, but not generate code for this pattern
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class FallbackTests
 
         // Generator should run without errors
         // The fallback should be handled gracefully
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -75,7 +75,7 @@ public class FallbackTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class FallbackTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -115,7 +115,7 @@ public class FallbackTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public class FallbackTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -155,7 +155,7 @@ public class FallbackTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -176,6 +176,6 @@ public class FallbackTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 }

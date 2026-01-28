@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 using static EFCore.FluentIncludes.Generator.Tests.GeneratorTestHelper;
 
@@ -26,7 +26,7 @@ public class FilteredIncludeTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class FilteredIncludeTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class FilteredIncludeTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class FilteredIncludeTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public class FilteredIncludeTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 
     [Fact]
@@ -126,6 +126,6 @@ public class FilteredIncludeTests
         """;
 
         var result = RunGenerator(source);
-        result.Diagnostics.Should().BeEmpty();
+        result.Diagnostics.ShouldBeEmpty();
     }
 }

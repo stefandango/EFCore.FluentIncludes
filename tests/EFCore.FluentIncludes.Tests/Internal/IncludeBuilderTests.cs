@@ -27,8 +27,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("JOIN");
-        queryString.Should().Contain("Customer");
+        queryString.ShouldContain("JOIN");
+        queryString.ShouldContain("Customer");
     }
 
     [Fact]
@@ -41,8 +41,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("JOIN");
-        queryString.Should().Contain("LineItem");
+        queryString.ShouldContain("JOIN");
+        queryString.ShouldContain("LineItem");
     }
 
     #endregion
@@ -59,8 +59,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("Customer");
-        queryString.Should().Contain("Address");
+        queryString.ShouldContain("Customer");
+        queryString.ShouldContain("Address");
     }
 
     [Fact]
@@ -73,8 +73,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("LineItem");
-        queryString.Should().Contain("Product");
+        queryString.ShouldContain("LineItem");
+        queryString.ShouldContain("Product");
     }
 
     [Fact]
@@ -87,9 +87,9 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("LineItem");
-        queryString.Should().Contain("Product");
-        queryString.Should().Contain("Categor");
+        queryString.ShouldContain("LineItem");
+        queryString.ShouldContain("Product");
+        queryString.ShouldContain("Categor");
     }
 
     #endregion
@@ -108,8 +108,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments1, segments2]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("Customer");
-        queryString.Should().Contain("LineItem");
+        queryString.ShouldContain("Customer");
+        queryString.ShouldContain("LineItem");
     }
 
     [Fact]
@@ -124,8 +124,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments1, segments2]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("Address");
-        queryString.Should().Contain("PaymentMethod");
+        queryString.ShouldContain("Address");
+        queryString.ShouldContain("PaymentMethod");
     }
 
     #endregion
@@ -142,8 +142,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("LineItem");
-        queryString.Should().Contain("Quantity");
+        queryString.ShouldContain("LineItem");
+        queryString.ShouldContain("Quantity");
     }
 
     [Fact]
@@ -156,9 +156,9 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("LineItem");
-        queryString.Should().Contain("Product");
-        queryString.Should().Contain("Quantity");
+        queryString.ShouldContain("LineItem");
+        queryString.ShouldContain("Product");
+        queryString.ShouldContain("Quantity");
     }
 
     #endregion
@@ -175,8 +175,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("LineItem");
-        queryString.Should().Contain("ORDER BY");
+        queryString.ShouldContain("LineItem");
+        queryString.ShouldContain("ORDER BY");
     }
 
     [Fact]
@@ -189,9 +189,9 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("LineItem");
-        queryString.Should().Contain("ORDER BY");
-        queryString.Should().Contain("DESC");
+        queryString.ShouldContain("LineItem");
+        queryString.ShouldContain("ORDER BY");
+        queryString.ShouldContain("DESC");
     }
 
     [Fact]
@@ -208,7 +208,7 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("ORDER BY");
+        queryString.ShouldContain("ORDER BY");
     }
 
     [Fact]
@@ -224,8 +224,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("Quantity");
-        queryString.Should().Contain("ORDER BY");
+        queryString.ShouldContain("Quantity");
+        queryString.ShouldContain("ORDER BY");
     }
 
     #endregion
@@ -239,7 +239,7 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
 
         var result = IncludeBuilder.ApplyIncludes(query, []);
 
-        result.Should().BeSameAs(query);
+        result.ShouldBeSameAs(query);
     }
 
     [Fact]
@@ -249,7 +249,7 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
 
         var result = IncludeBuilder.ApplyIncludes(query, [[]]);
 
-        result.Should().BeSameAs(query);
+        result.ShouldBeSameAs(query);
     }
 
     [Fact]
@@ -263,9 +263,9 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("LineItem");
-        queryString.Should().Contain("Product");
-        queryString.Should().Contain("Categor");
+        queryString.ShouldContain("LineItem");
+        queryString.ShouldContain("Product");
+        queryString.ShouldContain("Categor");
     }
 
     [Fact]
@@ -279,8 +279,8 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
         var queryString = result.ToQueryString();
-        queryString.Should().Contain("Customer");
-        queryString.Should().Contain("PaymentMethod");
+        queryString.ShouldContain("Customer");
+        queryString.ShouldContain("PaymentMethod");
     }
 
     #endregion
@@ -296,7 +296,7 @@ public class IncludeBuilderTests : IClassFixture<DatabaseFixture>
 
         var result = IncludeBuilder.ApplyIncludes(query, [segments]);
 
-        result.Should().BeAssignableTo<IQueryable<Order>>();
+        result.ShouldBeAssignableTo<IQueryable<Order>>();
     }
 
     #endregion

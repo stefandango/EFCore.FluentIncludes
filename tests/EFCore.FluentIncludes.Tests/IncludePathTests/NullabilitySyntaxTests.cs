@@ -31,9 +31,9 @@ public class NullabilitySyntaxTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
     }
 
     [Fact]
@@ -48,9 +48,9 @@ public class NullabilitySyntaxTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
     }
 
     [Fact]
@@ -65,11 +65,11 @@ public class NullabilitySyntaxTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         var iPhone = order!.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Category.Should().NotBeNull();
-        iPhone.Product.Category!.ParentCategory.Should().NotBeNull();
-        iPhone.Product.Category.ParentCategory!.Name.Should().Be("Phones");
+        iPhone.Product!.Category.ShouldNotBeNull();
+        iPhone.Product.Category!.ParentCategory.ShouldNotBeNull();
+        iPhone.Product.Category.ParentCategory!.Name.ShouldBe("Phones");
     }
 
     [Fact]
@@ -88,10 +88,10 @@ public class NullabilitySyntaxTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
     }
 }
 

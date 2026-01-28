@@ -29,13 +29,13 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         // Order 1 has LineItem Id=1 (iPhone, $999.99) and Id=2 (Phone Case, $29.99)
         var ids = order.LineItems.Select(li => li.Id).ToList();
-        ids.Should().BeInAscendingOrder();
-        ids[0].Should().Be(1);
-        ids[1].Should().Be(2);
+        ids.ShouldBe(ids.OrderBy(x => x).ToList());
+        ids[0].ShouldBe(1);
+        ids[1].ShouldBe(2);
     }
 
     [Fact]
@@ -50,12 +50,12 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         var ids = order.LineItems.Select(li => li.Id).ToList();
-        ids.Should().BeInDescendingOrder();
-        ids[0].Should().Be(2);
-        ids[1].Should().Be(1);
+        ids.ShouldBe(ids.OrderByDescending(x => x).ToList());
+        ids[0].ShouldBe(2);
+        ids[1].ShouldBe(1);
     }
 
     [Fact]
@@ -70,15 +70,15 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         var items = order.LineItems.ToList();
-        items[0].Id.Should().Be(1);
-        items[0].Product.Should().NotBeNull();
-        items[0].Product!.Name.Should().Be("iPhone 15"); // Id=1 is iPhone
-        items[1].Id.Should().Be(2);
-        items[1].Product.Should().NotBeNull();
-        items[1].Product!.Name.Should().Be("Phone Case"); // Id=2 is Phone Case
+        items[0].Id.ShouldBe(1);
+        items[0].Product.ShouldNotBeNull();
+        items[0].Product!.Name.ShouldBe("iPhone 15"); // Id=1 is iPhone
+        items[1].Id.ShouldBe(2);
+        items[1].Product.ShouldNotBeNull();
+        items[1].Product!.Name.ShouldBe("Phone Case"); // Id=2 is Phone Case
     }
 
     [Fact]
@@ -93,11 +93,11 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         // Both have Quantity=1, so should be ordered by Id
         var ids = order.LineItems.Select(li => li.Id).ToList();
-        ids.Should().BeInAscendingOrder();
+        ids.ShouldBe(ids.OrderBy(x => x).ToList());
     }
 
     [Fact]
@@ -112,11 +112,11 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         // Both have Quantity=1, so should be ordered by Id descending
         var ids = order.LineItems.Select(li => li.Id).ToList();
-        ids.Should().BeInDescendingOrder();
+        ids.ShouldBe(ids.OrderByDescending(x => x).ToList());
     }
 
     [Fact]
@@ -131,10 +131,10 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         // Only LineItem Id=2 (Phone Case) passes the filter
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().Id.Should().Be(2);
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().Id.ShouldBe(2);
     }
 
     [Fact]
@@ -149,13 +149,13 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
 
         var iPhone = order.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Images.Should().HaveCount(2);
+        iPhone.Product!.Images.Count.ShouldBe(2);
         var imageIds = iPhone.Product.Images.Select(i => i.Id).ToList();
-        imageIds.Should().BeInAscendingOrder();
+        imageIds.ShouldBe(imageIds.OrderBy(x => x).ToList());
     }
 
     [Fact]
@@ -171,10 +171,10 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         var ids = order.LineItems.Select(li => li.Id).ToList();
-        ids.Should().BeInDescendingOrder();
+        ids.ShouldBe(ids.OrderByDescending(x => x).ToList());
     }
 
     [Fact]
@@ -189,10 +189,10 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         var ids = order.LineItems.Select(li => li.Id).ToList();
-        ids.Should().BeInDescendingOrder();
+        ids.ShouldBe(ids.OrderByDescending(x => x).ToList());
     }
 
     [Fact]
@@ -209,12 +209,12 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         var ids = order.LineItems.Select(li => li.Id).ToList();
-        ids.Should().BeInAscendingOrder();
-        order.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
+        ids.ShouldBe(ids.OrderBy(x => x).ToList());
+        order.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
     }
 
     [Fact]
@@ -233,13 +233,13 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         // Both items have Quantity=1, so both pass the filter
-        order!.LineItems.Should().HaveCount(2);
+        order!.LineItems.Count.ShouldBe(2);
         var ids = order.LineItems.Select(li => li.Id).ToList();
-        ids.Should().BeInDescendingOrder();
-        ids[0].Should().Be(2);
-        ids[1].Should().Be(1);
+        ids.ShouldBe(ids.OrderByDescending(x => x).ToList());
+        ids[0].ShouldBe(2);
+        ids[1].ShouldBe(1);
     }
 
     [Fact]
@@ -254,13 +254,13 @@ public class OrderedIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         // ProductIds are 1 (iPhone) and 3 (Phone Case)
         var productIds = order.LineItems.Select(li => li.ProductId).ToList();
-        productIds.Should().BeInDescendingOrder();
-        productIds[0].Should().Be(3);
-        productIds[1].Should().Be(1);
+        productIds.ShouldBe(productIds.OrderByDescending(x => x).ToList());
+        productIds[0].ShouldBe(3);
+        productIds[1].ShouldBe(1);
     }
 
     private sealed class OrderedLineItemsSpec : IncludeSpec<Order>

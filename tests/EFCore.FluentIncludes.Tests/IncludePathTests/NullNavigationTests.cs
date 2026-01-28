@@ -36,11 +36,11 @@ public class NullNavigationTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - Should not throw
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         var phoneCase = order!.LineItems.First(li => li.Product!.Name == "Phone Case");
-        phoneCase.Product!.Supplier.Should().NotBeNull();
-        phoneCase.Product.Supplier!.Name.Should().Be("GadgetWorld");
-        phoneCase.Product.Supplier.Address.Should().BeNull(); // Gracefully null
+        phoneCase.Product!.Supplier.ShouldNotBeNull();
+        phoneCase.Product.Supplier!.Name.ShouldBe("GadgetWorld");
+        phoneCase.Product.Supplier.Address.ShouldBeNull(); // Gracefully null
     }
 
     /// <summary>
@@ -60,9 +60,9 @@ public class NullNavigationTests
             .FirstOrDefaultAsync(o => o.Id == 4);
 
         // Assert - Should not throw
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         var genericItem = order!.LineItems.First(li => li.Product!.Name == "Generic Item");
-        genericItem.Product!.Supplier.Should().BeNull(); // Gracefully null - no supplier at all
+        genericItem.Product!.Supplier.ShouldBeNull(); // Gracefully null - no supplier at all
     }
 
     /// <summary>
@@ -81,10 +81,10 @@ public class NullNavigationTests
             .FirstOrDefaultAsync(o => o.Id == 4);
 
         // Assert - Should not throw
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Name.Should().Be("No Address Customer");
-        order.Customer.Address.Should().BeNull(); // Gracefully null
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Name.ShouldBe("No Address Customer");
+        order.Customer.Address.ShouldBeNull(); // Gracefully null
     }
 
     /// <summary>
@@ -103,17 +103,17 @@ public class NullNavigationTests
             .FirstOrDefaultAsync(o => o.Id == 4);
 
         // Assert - Should not throw
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
 
         // Phone Case has Supplier with NO Address
         var phoneCase = order.LineItems.First(li => li.Product!.Name == "Phone Case");
-        phoneCase.Product!.Supplier.Should().NotBeNull();
-        phoneCase.Product.Supplier!.Address.Should().BeNull();
+        phoneCase.Product!.Supplier.ShouldNotBeNull();
+        phoneCase.Product.Supplier!.Address.ShouldBeNull();
 
         // Generic Item has NO Supplier at all
         var genericItem = order.LineItems.First(li => li.Product!.Name == "Generic Item");
-        genericItem.Product!.Supplier.Should().BeNull();
+        genericItem.Product!.Supplier.ShouldBeNull();
     }
 
     /// <summary>
@@ -132,18 +132,18 @@ public class NullNavigationTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
 
         // iPhone has Supplier with Address
         var iPhone = order.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Supplier.Should().NotBeNull();
-        iPhone.Product.Supplier!.Address.Should().NotBeNull();
+        iPhone.Product!.Supplier.ShouldNotBeNull();
+        iPhone.Product.Supplier!.Address.ShouldNotBeNull();
 
         // Phone Case has Supplier with NO Address
         var phoneCase = order.LineItems.First(li => li.Product!.Name == "Phone Case");
-        phoneCase.Product!.Supplier.Should().NotBeNull();
-        phoneCase.Product.Supplier!.Address.Should().BeNull();
+        phoneCase.Product!.Supplier.ShouldNotBeNull();
+        phoneCase.Product.Supplier!.Address.ShouldBeNull();
     }
 
     /// <summary>
@@ -162,12 +162,12 @@ public class NullNavigationTests
             .FirstOrDefaultAsync(c => c.Name == "Smartphones");
 
         // Assert - Should not throw
-        category.Should().NotBeNull();
-        category!.ParentCategory.Should().NotBeNull();
-        category.ParentCategory!.Name.Should().Be("Phones");
-        category.ParentCategory.ParentCategory.Should().NotBeNull();
-        category.ParentCategory.ParentCategory!.Name.Should().Be("Electronics");
-        category.ParentCategory.ParentCategory.ParentCategory.Should().BeNull(); // Top level - no parent
+        category.ShouldNotBeNull();
+        category!.ParentCategory.ShouldNotBeNull();
+        category.ParentCategory!.Name.ShouldBe("Phones");
+        category.ParentCategory.ParentCategory.ShouldNotBeNull();
+        category.ParentCategory.ParentCategory!.Name.ShouldBe("Electronics");
+        category.ParentCategory.ParentCategory.ParentCategory.ShouldBeNull(); // Top level - no parent
     }
 
     /// <summary>
@@ -189,18 +189,18 @@ public class NullNavigationTests
             .FirstOrDefaultAsync(o => o.Id == 4);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
 
         // Customer has no address
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().BeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldBeNull();
 
         // Generic Item has no supplier
         var genericItem = order.LineItems.First(li => li.Product!.Name == "Generic Item");
-        genericItem.Product!.Supplier.Should().BeNull();
-        genericItem.Product.Category.Should().NotBeNull();
-        genericItem.Product.Category!.Name.Should().Be("Accessories");
-        genericItem.Product.Category.ParentCategory.Should().NotBeNull();
-        genericItem.Product.Category.ParentCategory!.Name.Should().Be("Electronics");
+        genericItem.Product!.Supplier.ShouldBeNull();
+        genericItem.Product.Category.ShouldNotBeNull();
+        genericItem.Product.Category!.Name.ShouldBe("Accessories");
+        genericItem.Product.Category.ParentCategory.ShouldNotBeNull();
+        genericItem.Product.Category.ParentCategory!.Name.ShouldBe("Electronics");
     }
 }

@@ -29,11 +29,11 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         // Order 1 has 2 line items: iPhone ($999.99) and Phone Case ($29.99)
         // Only iPhone should be included
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().UnitPrice.Should().Be(999.99m);
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().UnitPrice.ShouldBe(999.99m);
     }
 
     [Fact]
@@ -48,10 +48,10 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().Product.Should().NotBeNull();
-        order.LineItems.First().Product!.Name.Should().Be("iPhone 15");
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().Product.ShouldNotBeNull();
+        order.LineItems.First().Product!.Name.ShouldBe("iPhone 15");
     }
 
     [Fact]
@@ -66,13 +66,13 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
         var lineItem = order.LineItems.First();
-        lineItem.Product.Should().NotBeNull();
-        lineItem.Product!.Category.Should().NotBeNull();
-        lineItem.Product.Category!.ParentCategory.Should().NotBeNull();
-        lineItem.Product.Category.ParentCategory!.Name.Should().Be("Phones");
+        lineItem.Product.ShouldNotBeNull();
+        lineItem.Product!.Category.ShouldNotBeNull();
+        lineItem.Product.Category!.ParentCategory.ShouldNotBeNull();
+        lineItem.Product.Category.ParentCategory!.Name.ShouldBe("Phones");
     }
 
     [Fact]
@@ -87,13 +87,13 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
 
         var iPhone = order.LineItems.First(li => li.Product!.Name == "iPhone 15");
         // iPhone has 2 images, but only 1 is primary
-        iPhone.Product!.Images.Should().HaveCount(1);
-        iPhone.Product.Images.First().IsPrimary.Should().BeTrue();
+        iPhone.Product!.Images.Count.ShouldBe(1);
+        iPhone.Product.Images.First().IsPrimary.ShouldBeTrue();
     }
 
     [Fact]
@@ -108,8 +108,8 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().BeEmpty();
+        order.ShouldNotBeNull();
+        order!.LineItems.ShouldBeEmpty();
     }
 
     [Fact]
@@ -126,8 +126,8 @@ public class FilteredIncludeTests
                 o => o.LineItems.Where(li => li.UnitPrice < 50).Each().Discounts)
             .FirstOrDefaultAsync(o => o.Id == 1);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*Only one unique filter per navigation*");
+        var ex = await Should.ThrowAsync<InvalidOperationException>(act);
+        ex.Message.ShouldContain("Only one unique filter per navigation");
     }
 
     [Fact]
@@ -144,10 +144,10 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().Product.Should().NotBeNull();
-        order.LineItems.First().Discounts.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().Product.ShouldNotBeNull();
+        order.LineItems.First().Discounts.ShouldNotBeNull();
     }
 
     [Fact]
@@ -162,10 +162,10 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(p => p.Id == 1); // iPhone
 
         // Assert
-        product.Should().NotBeNull();
+        product.ShouldNotBeNull();
         // iPhone has tags: "premium", "bestseller" - only "premium" should be loaded
-        product!.Tags.Should().HaveCount(1);
-        product.Tags.First().Tag.Should().Be("premium");
+        product!.Tags.Count.ShouldBe(1);
+        product.Tags.First().Tag.ShouldBe("premium");
     }
 
     [Fact]
@@ -181,9 +181,9 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().Product.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().Product.ShouldNotBeNull();
     }
 
     [Fact]
@@ -200,11 +200,11 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().Product.Should().NotBeNull();
-        order.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().Product.ShouldNotBeNull();
+        order.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
     }
 
     [Fact]
@@ -219,9 +219,9 @@ public class FilteredIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().UnitPrice.Should().BeGreaterThan(100);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().UnitPrice.ShouldBeGreaterThan(100);
     }
 
     private sealed class HighValueLineItemsSpec : IncludeSpec<Order>

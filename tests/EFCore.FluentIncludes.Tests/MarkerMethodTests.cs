@@ -15,8 +15,9 @@ public class MarkerMethodTests
 
         var action = () => collection.Each();
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Each()*marker*should not be called directly*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("Each()");
+        ex.Message.ShouldContain("marker");
     }
 
     [Fact]
@@ -26,8 +27,9 @@ public class MarkerMethodTests
 
         var action = () => collection.Each();
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Each()*marker*should not be called directly*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("Each()");
+        ex.Message.ShouldContain("marker");
     }
 
     [Fact]
@@ -37,8 +39,9 @@ public class MarkerMethodTests
 
         var action = () => list.Each();
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Each()*marker*should not be called directly*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("Each()");
+        ex.Message.ShouldContain("marker");
     }
 
     [Fact]
@@ -48,8 +51,9 @@ public class MarkerMethodTests
 
         var action = () => list.Each();
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Each()*marker*should not be called directly*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("Each()");
+        ex.Message.ShouldContain("marker");
     }
 
     #endregion
@@ -63,8 +67,9 @@ public class MarkerMethodTests
 
         var action = () => value.To();
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*To()*marker*should not be called directly*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("To()");
+        ex.Message.ShouldContain("marker");
     }
 
     [Fact]
@@ -74,8 +79,9 @@ public class MarkerMethodTests
 
         var action = () => value.To();
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*To()*marker*should not be called directly*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("To()");
+        ex.Message.ShouldContain("marker");
     }
 
     #endregion

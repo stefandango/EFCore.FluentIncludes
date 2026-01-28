@@ -15,11 +15,11 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Property.Name.Should().Be("Customer");
-        segments[0].IsCollection.Should().BeFalse();
-        segments[0].SourceType.Should().Be<Order>();
-        segments[0].TargetType.Should().Be<Customer>();
+        segments.Count.ShouldBe(1);
+        segments[0].Property.Name.ShouldBe("Customer");
+        segments[0].IsCollection.ShouldBeFalse();
+        segments[0].SourceType.ShouldBe(typeof(Order));
+        segments[0].TargetType.ShouldBe(typeof(Customer));
     }
 
     [Fact]
@@ -29,11 +29,11 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Property.Name.Should().Be("LineItems");
-        segments[0].IsCollection.Should().BeTrue();
-        segments[0].SourceType.Should().Be<Order>();
-        segments[0].TargetType.Should().Be<LineItem>();
+        segments.Count.ShouldBe(1);
+        segments[0].Property.Name.ShouldBe("LineItems");
+        segments[0].IsCollection.ShouldBeTrue();
+        segments[0].SourceType.ShouldBe(typeof(Order));
+        segments[0].TargetType.ShouldBe(typeof(LineItem));
     }
 
     [Fact]
@@ -43,9 +43,9 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(2);
-        segments[0].Property.Name.Should().Be("Customer");
-        segments[1].Property.Name.Should().Be("Address");
+        segments.Count.ShouldBe(2);
+        segments[0].Property.Name.ShouldBe("Customer");
+        segments[1].Property.Name.ShouldBe("Address");
     }
 
     [Fact]
@@ -55,11 +55,11 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(3);
-        segments[0].Property.Name.Should().Be("LineItems");
-        segments[0].IsCollection.Should().BeTrue();
-        segments[1].Property.Name.Should().Be("Product");
-        segments[2].Property.Name.Should().Be("Category");
+        segments.Count.ShouldBe(3);
+        segments[0].Property.Name.ShouldBe("LineItems");
+        segments[0].IsCollection.ShouldBeTrue();
+        segments[1].Property.Name.ShouldBe("Product");
+        segments[2].Property.Name.ShouldBe("Category");
     }
 
     #endregion
@@ -73,10 +73,10 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(2);
-        segments[0].Property.Name.Should().Be("LineItems");
-        segments[0].IsCollection.Should().BeTrue();
-        segments[1].Property.Name.Should().Be("Product");
+        segments.Count.ShouldBe(2);
+        segments[0].Property.Name.ShouldBe("LineItems");
+        segments[0].IsCollection.ShouldBeTrue();
+        segments[1].Property.Name.ShouldBe("Product");
     }
 
     [Fact]
@@ -86,13 +86,13 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(3);
-        segments[0].Property.Name.Should().Be("LineItems");
-        segments[0].IsCollection.Should().BeTrue();
-        segments[1].Property.Name.Should().Be("Product");
-        segments[1].IsCollection.Should().BeFalse();
-        segments[2].Property.Name.Should().Be("Images");
-        segments[2].IsCollection.Should().BeTrue();
+        segments.Count.ShouldBe(3);
+        segments[0].Property.Name.ShouldBe("LineItems");
+        segments[0].IsCollection.ShouldBeTrue();
+        segments[1].Property.Name.ShouldBe("Product");
+        segments[1].IsCollection.ShouldBeFalse();
+        segments[2].Property.Name.ShouldBe("Images");
+        segments[2].IsCollection.ShouldBeTrue();
     }
 
     #endregion
@@ -106,9 +106,9 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(2);
-        segments[0].Property.Name.Should().Be("Customer");
-        segments[1].Property.Name.Should().Be("Address");
+        segments.Count.ShouldBe(2);
+        segments[0].Property.Name.ShouldBe("Customer");
+        segments[1].Property.Name.ShouldBe("Address");
     }
 
     [Fact]
@@ -118,11 +118,11 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(4);
-        segments[0].Property.Name.Should().Be("LineItems");
-        segments[1].Property.Name.Should().Be("Product");
-        segments[2].Property.Name.Should().Be("Category");
-        segments[3].Property.Name.Should().Be("ParentCategory");
+        segments.Count.ShouldBe(4);
+        segments[0].Property.Name.ShouldBe("LineItems");
+        segments[1].Property.Name.ShouldBe("Product");
+        segments[2].Property.Name.ShouldBe("Category");
+        segments[3].Property.Name.ShouldBe("ParentCategory");
     }
 
     #endregion
@@ -136,10 +136,10 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Property.Name.Should().Be("LineItems");
-        segments[0].Filter.Should().NotBeNull();
-        segments[0].IsCollection.Should().BeTrue();
+        segments.Count.ShouldBe(1);
+        segments[0].Property.Name.ShouldBe("LineItems");
+        segments[0].Filter.ShouldNotBeNull();
+        segments[0].IsCollection.ShouldBeTrue();
     }
 
     [Fact]
@@ -149,8 +149,8 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Filter.Should().NotBeNull();
+        segments.Count.ShouldBe(1);
+        segments[0].Filter.ShouldNotBeNull();
     }
 
     [Fact]
@@ -160,11 +160,11 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(2);
-        segments[0].Property.Name.Should().Be("LineItems");
-        segments[0].Filter.Should().NotBeNull();
-        segments[1].Property.Name.Should().Be("Product");
-        segments[1].Filter.Should().BeNull();
+        segments.Count.ShouldBe(2);
+        segments[0].Property.Name.ShouldBe("LineItems");
+        segments[0].Filter.ShouldNotBeNull();
+        segments[1].Property.Name.ShouldBe("Product");
+        segments[1].Filter.ShouldBeNull();
     }
 
     #endregion
@@ -178,11 +178,11 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Property.Name.Should().Be("LineItems");
-        segments[0].Orderings.Should().NotBeNull();
-        segments[0].Orderings.Should().HaveCount(1);
-        segments[0].Orderings![0].Descending.Should().BeFalse();
+        segments.Count.ShouldBe(1);
+        segments[0].Property.Name.ShouldBe("LineItems");
+        segments[0].Orderings.ShouldNotBeNull();
+        segments[0].Orderings!.Count.ShouldBe(1);
+        segments[0].Orderings![0].Descending.ShouldBeFalse();
     }
 
     [Fact]
@@ -192,9 +192,9 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Orderings.Should().NotBeNull();
-        segments[0].Orderings![0].Descending.Should().BeTrue();
+        segments.Count.ShouldBe(1);
+        segments[0].Orderings.ShouldNotBeNull();
+        segments[0].Orderings![0].Descending.ShouldBeTrue();
     }
 
     [Fact]
@@ -207,10 +207,10 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Orderings.Should().HaveCount(2);
-        segments[0].Orderings![0].Descending.Should().BeFalse();
-        segments[0].Orderings![1].Descending.Should().BeTrue();
+        segments.Count.ShouldBe(1);
+        segments[0].Orderings!.Count.ShouldBe(2);
+        segments[0].Orderings![0].Descending.ShouldBeFalse();
+        segments[0].Orderings![1].Descending.ShouldBeTrue();
     }
 
     [Fact]
@@ -223,10 +223,10 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Filter.Should().NotBeNull();
-        segments[0].Orderings.Should().NotBeNull();
-        segments[0].Orderings.Should().HaveCount(1);
+        segments.Count.ShouldBe(1);
+        segments[0].Filter.ShouldNotBeNull();
+        segments[0].Orderings.ShouldNotBeNull();
+        segments[0].Orderings!.Count.ShouldBe(1);
     }
 
     #endregion
@@ -243,7 +243,7 @@ public class PathParserTests
         var segments2 = PathParser.Parse(expr2);
 
         // Both should return equivalent results (content equality)
-        segments1.Should().BeEquivalentTo(segments2);
+        segments1.ShouldBe(segments2);
     }
 
     [Fact]
@@ -255,7 +255,7 @@ public class PathParserTests
         var segments1 = PathParser.Parse(expr);
         var segments2 = PathParser.Parse(expr);
 
-        segments1.Should().NotBeSameAs(segments2);
+        segments1.ShouldNotBeSameAs(segments2);
     }
 
     #endregion
@@ -272,8 +272,8 @@ public class PathParserTests
 
         var action = () => PathParser.Parse(lambda);
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Unsupported expression type*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("Unsupported expression type");
     }
 
     [Fact]
@@ -289,8 +289,8 @@ public class PathParserTests
 
         var action = () => PathParser.Parse(lambda);
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Only property access*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("Only property access");
     }
 
     [Fact]
@@ -301,8 +301,8 @@ public class PathParserTests
 
         var action = () => PathParser.Parse(expr);
 
-        action.Should().Throw<InvalidOperationException>()
-            .WithMessage("*Unsupported method call 'Select'*");
+        var ex = action.ShouldThrow<InvalidOperationException>();
+        ex.Message.ShouldContain("Unsupported method call 'Select'");
     }
 
     [Fact]
@@ -315,9 +315,9 @@ public class PathParserTests
 
         var segments = PathParser.Parse(lambda);
 
-        segments.Should().HaveCount(1);
-        segments[0].IsCollection.Should().BeTrue();
-        segments[0].TargetType.Should().Be<string>();
+        segments.Count.ShouldBe(1);
+        segments[0].IsCollection.ShouldBeTrue();
+        segments[0].TargetType.ShouldBe(typeof(string));
     }
 
     #endregion
@@ -346,8 +346,8 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Property.Name.Should().Be("Customer");
+        segments.Count.ShouldBe(1);
+        segments[0].Property.Name.ShouldBe("Customer");
     }
 
     #endregion
@@ -361,9 +361,9 @@ public class PathParserTests
 
         var segments = PathParser.Parse(expr);
 
-        segments.Should().HaveCount(1);
-        segments[0].Property.Name.Should().Be("Name");
-        segments[0].IsCollection.Should().BeFalse();
+        segments.Count.ShouldBe(1);
+        segments[0].Property.Name.ShouldBe("Name");
+        segments[0].IsCollection.ShouldBeFalse();
     }
 
     #endregion

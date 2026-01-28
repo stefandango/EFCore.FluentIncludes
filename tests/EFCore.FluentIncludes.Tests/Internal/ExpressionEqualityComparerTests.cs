@@ -15,13 +15,13 @@ public class ExpressionEqualityComparerTests
     {
         Expression<Func<Order, Customer?>> expr = o => o.Customer;
 
-        Comparer.Equals(expr, expr).Should().BeTrue();
+        Comparer.Equals(expr, expr).ShouldBeTrue();
     }
 
     [Fact]
     public void Equals_BothNull_ReturnsTrue()
     {
-        Comparer.Equals(null, null).Should().BeTrue();
+        Comparer.Equals(null, null).ShouldBeTrue();
     }
 
     [Fact]
@@ -29,8 +29,8 @@ public class ExpressionEqualityComparerTests
     {
         Expression<Func<Order, Customer?>> expr = o => o.Customer;
 
-        Comparer.Equals(expr, null).Should().BeFalse();
-        Comparer.Equals(null, expr).Should().BeFalse();
+        Comparer.Equals(expr, null).ShouldBeFalse();
+        Comparer.Equals(null, expr).ShouldBeFalse();
     }
 
     #endregion
@@ -43,7 +43,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Customer?>> expr1 = o => o.Customer;
         Expression<Func<Order, Customer?>> expr2 = o => o.Customer;
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Address?>> expr1 = o => o.ShippingAddress;
         Expression<Func<Order, Address?>> expr2 = o => o.BillingAddress;
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Address?>> expr1 = o => o.Customer!.Address;
         Expression<Func<Order, Address?>> expr2 = o => o.Customer!.Address;
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Address?>> expr1 = o => o.Customer!.Address;
         Expression<Func<Order, string>> expr2 = o => o.Customer!.Name;
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -83,7 +83,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Product?>> expr1 = o => o.LineItems.Each().Product;
         Expression<Func<Order, Product?>> expr2 = o => o.LineItems.Each().Product;
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Product?>> expr1 = o => o.LineItems.Each().Product;
         Expression<Func<Order, Order?>> expr2 = o => o.LineItems.Each().Order;
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where(li => li.Quantity > 0).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -110,7 +110,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where(li => li.Quantity > 5).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -123,7 +123,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Customer?>> expr1 = o => o.Customer;
         Expression<Func<Order, Customer?>> expr2 = x => x.Customer;
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0).Each();
         Expression<Func<Order, LineItem>> expr2 = order => order.LineItems.Where(item => item.Quantity > 0).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     #endregion
@@ -145,7 +145,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0 && li.UnitPrice < 100).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where(li => li.Quantity > 0 && li.UnitPrice < 100).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -154,7 +154,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where(li => li.Quantity >= 0).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -167,7 +167,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 5).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where(li => li.Quantity > 5).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 5).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where(li => li.Quantity > 10).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -189,7 +189,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, object>> expr1 = o => o.Customer!;
         Expression<Func<Order, object>> expr2 = o => o.Customer!;
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     #endregion
@@ -202,7 +202,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0 ? true : false).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where(li => li.Quantity > 0 ? true : false).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -211,7 +211,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0 ? true : false).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where(li => li.Quantity > 0 ? false : true).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -224,7 +224,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Customer?>> expr1 = o => o.Customer;
         Expression<Func<Order, Address?>> expr2 = o => o.ShippingAddress;
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     [Fact]
@@ -233,7 +233,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Customer?>> expr1 = o => o.Customer;
         Expression<Func<Order, int, Customer?>> expr2 = (o, _) => o.Customer;
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -243,7 +243,7 @@ public class ExpressionEqualityComparerTests
     [Fact]
     public void GetHashCode_NullExpression_ReturnsZero()
     {
-        Comparer.GetHashCode(null!).Should().Be(0);
+        Comparer.GetHashCode(null!).ShouldBe(0);
     }
 
     [Fact]
@@ -252,7 +252,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Customer?>> expr1 = o => o.Customer;
         Expression<Func<Order, Customer?>> expr2 = o => o.Customer;
 
-        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+        Comparer.GetHashCode(expr1).ShouldBe(Comparer.GetHashCode(expr2));
     }
 
     [Fact]
@@ -261,7 +261,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Customer?>> expr1 = o => o.Customer;
         Expression<Func<Order, Customer?>> expr2 = x => x.Customer;
 
-        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+        Comparer.GetHashCode(expr1).ShouldBe(Comparer.GetHashCode(expr2));
     }
 
     [Fact]
@@ -271,7 +271,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, Address?>> expr2 = o => o.BillingAddress;
 
         // Note: Hash collisions are possible but unlikely for different expressions
-        Comparer.GetHashCode(expr1).Should().NotBe(Comparer.GetHashCode(expr2));
+        Comparer.GetHashCode(expr1).ShouldNotBe(Comparer.GetHashCode(expr2));
     }
 
     [Fact]
@@ -280,7 +280,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0).Each();
         Expression<Func<Order, LineItem>> expr2 = order => order.LineItems.Where(item => item.Quantity > 0).Each();
 
-        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+        Comparer.GetHashCode(expr1).ShouldBe(Comparer.GetHashCode(expr2));
     }
 
     #endregion
@@ -293,7 +293,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.OrderBy(li => li.Quantity).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.OrderBy(li => li.Quantity).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -302,7 +302,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.OrderBy(li => li.Quantity).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.OrderBy(li => li.UnitPrice).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     [Fact]
@@ -311,7 +311,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.OrderBy(li => li.Quantity).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.OrderByDescending(li => li.Quantity).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -324,7 +324,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<LineItem, object>> expr1 = li => new { li.Quantity, li.UnitPrice };
         Expression<Func<LineItem, object>> expr2 = li => new { li.Quantity, li.UnitPrice };
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -333,7 +333,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<LineItem, object>> expr1 = li => new { li.Quantity, li.UnitPrice };
         Expression<Func<LineItem, object>> expr2 = li => new { li.Id, li.Quantity };
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -346,7 +346,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<LineItem, TestDto>> expr1 = li => new TestDto { Value = li.Quantity };
         Expression<Func<LineItem, TestDto>> expr2 = li => new TestDto { Value = li.Quantity };
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -355,7 +355,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<LineItem, TestDto>> expr1 = li => new TestDto { Value = li.Quantity };
         Expression<Func<LineItem, TestDto>> expr2 = li => new TestDto { Value = li.Id };
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     [Fact]
@@ -364,7 +364,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<LineItem, TestDto>> expr1 = li => new TestDto { Value = li.Quantity };
         Expression<Func<LineItem, TestDto>> expr2 = li => new TestDto { Name = "test" };
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -383,7 +383,7 @@ public class ExpressionEqualityComparerTests
         var lambda1 = Expression.Lambda<Func<int, int>>(invoke1, param);
         var lambda2 = Expression.Lambda<Func<int, int>>(invoke2, param);
 
-        Comparer.Equals(lambda1, lambda2).Should().BeTrue();
+        Comparer.Equals(lambda1, lambda2).ShouldBeTrue();
     }
 
     #endregion
@@ -401,7 +401,7 @@ public class ExpressionEqualityComparerTests
         var lambda1 = Expression.Lambda<Func<int, int>>(param1, param1);
         var lambda2 = Expression.Lambda<Func<int, int>>(param2, param2);
 
-        Comparer.Equals(lambda1, lambda2).Should().BeTrue();
+        Comparer.Equals(lambda1, lambda2).ShouldBeTrue();
     }
 
     [Fact]
@@ -410,7 +410,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<int, int>> expr1 = x => x;
         Expression<Func<long, long>> expr2 = x => x;
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -427,7 +427,7 @@ public class ExpressionEqualityComparerTests
         var lambda2 = Expression.Lambda<Func<int[], int>>(arrayLength, param);
 
         // Same expression should still be equal via reference equality in ExpressionsEqual
-        Comparer.Equals(lambda1, lambda2).Should().BeTrue();
+        Comparer.Equals(lambda1, lambda2).ShouldBeTrue();
     }
 
     [Fact]
@@ -441,7 +441,7 @@ public class ExpressionEqualityComparerTests
         var lambda2 = Expression.Lambda<Func<int[], int>>(arrayLength2, param2);
 
         // Different array length expressions should be equal (same structure)
-        Comparer.Equals(lambda1, lambda2).Should().BeTrue();
+        Comparer.Equals(lambda1, lambda2).ShouldBeTrue();
     }
 
     #endregion
@@ -454,7 +454,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<Order, LineItem>> expr1 = o => o.LineItems.Where(li => li.Quantity > 0).Each();
         Expression<Func<Order, LineItem>> expr2 = o => o.LineItems.Where((li, idx) => li.Quantity > 0).Each();
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -469,7 +469,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<TestOuter>> expr1 = () => new TestOuter { Inner = { Value = 42 } };
         Expression<Func<TestOuter>> expr2 = () => new TestOuter { Inner = { Value = 42 } };
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -478,7 +478,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<TestOuter>> expr1 = () => new TestOuter { Inner = { Value = 42 } };
         Expression<Func<TestOuter>> expr2 = () => new TestOuter { Inner = { Value = 99 } };
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -493,7 +493,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2, 3 } };
         Expression<Func<TestContainer>> expr2 = () => new TestContainer { Items = { 1, 2, 3 } };
 
-        Comparer.Equals(expr1, expr2).Should().BeTrue();
+        Comparer.Equals(expr1, expr2).ShouldBeTrue();
     }
 
     [Fact]
@@ -502,7 +502,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2, 3 } };
         Expression<Func<TestContainer>> expr2 = () => new TestContainer { Items = { 4, 5, 6 } };
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     [Fact]
@@ -511,7 +511,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2 } };
         Expression<Func<TestContainer>> expr2 = () => new TestContainer { Items = { 1, 2, 3 } };
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -525,7 +525,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2 } };
         Expression<Func<TestContainerWithAssignment>> expr2 = () => new TestContainerWithAssignment { Items = new List<int> { 1, 2 } };
 
-        Comparer.Equals(expr1, expr2).Should().BeFalse();
+        Comparer.Equals(expr1, expr2).ShouldBeFalse();
     }
 
     #endregion
@@ -538,7 +538,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<LineItem, TestDto>> expr1 = li => new TestDto { Value = li.Quantity };
         Expression<Func<LineItem, TestDto>> expr2 = li => new TestDto { Value = li.Quantity };
 
-        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+        Comparer.GetHashCode(expr1).ShouldBe(Comparer.GetHashCode(expr2));
     }
 
     [Fact]
@@ -547,7 +547,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<TestOuter>> expr1 = () => new TestOuter { Inner = { Value = 42 } };
         Expression<Func<TestOuter>> expr2 = () => new TestOuter { Inner = { Value = 42 } };
 
-        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+        Comparer.GetHashCode(expr1).ShouldBe(Comparer.GetHashCode(expr2));
     }
 
     [Fact]
@@ -556,7 +556,7 @@ public class ExpressionEqualityComparerTests
         Expression<Func<TestContainer>> expr1 = () => new TestContainer { Items = { 1, 2, 3 } };
         Expression<Func<TestContainer>> expr2 = () => new TestContainer { Items = { 1, 2, 3 } };
 
-        Comparer.GetHashCode(expr1).Should().Be(Comparer.GetHashCode(expr2));
+        Comparer.GetHashCode(expr1).ShouldBe(Comparer.GetHashCode(expr2));
     }
 
     #endregion

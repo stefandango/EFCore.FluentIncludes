@@ -180,9 +180,9 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Name.Should().Be("John Doe");
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Name.ShouldBe("John Doe");
     }
 
     [Fact]
@@ -197,10 +197,10 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -215,22 +215,22 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
 
         // From OrderWithCustomerDetailsSpec (via OrderSummarySpec)
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
 
         // From OrderWithItemsSpec
-        order.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
+        order.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null);
 
         // Additional includes from OrderFullSpec
-        order.ShippingAddress.Should().NotBeNull();
-        order.BillingAddress.Should().NotBeNull();
-        order.Payments.First().PaymentMethod.Should().NotBeNull();
-        order.Notes.First().Author.Should().NotBeNull();
+        order.ShippingAddress.ShouldNotBeNull();
+        order.BillingAddress.ShouldNotBeNull();
+        order.Payments.First().PaymentMethod.ShouldNotBeNull();
+        order.Notes.First().Author.ShouldNotBeNull();
     }
 
     [Fact]
@@ -246,8 +246,8 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
     }
 
     [Fact]
@@ -262,11 +262,11 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.LineItems.Should().HaveCount(2);
-        order.LineItems.First().Product.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.LineItems.Count.ShouldBe(2);
+        order.LineItems.First().Product.ShouldNotBeNull();
     }
 
     [Fact]
@@ -281,11 +281,11 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull(); // From OrderSummarySpec
-        order.LineItems.Should().HaveCount(2); // From OrderWithItemsSpec
-        order.LineItems.First().Product.Should().NotBeNull();
-        order.Notes.First().Author.Should().NotBeNull(); // From OrderAuditSpec
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull(); // From OrderSummarySpec
+        order.LineItems.Count.ShouldBe(2); // From OrderWithItemsSpec
+        order.LineItems.First().Product.ShouldNotBeNull();
+        order.Notes.First().Author.ShouldNotBeNull(); // From OrderAuditSpec
     }
 
     [Fact]
@@ -302,10 +302,10 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.LineItems.Should().HaveCount(2);
-        order.LineItems.First().Product.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.LineItems.Count.ShouldBe(2);
+        order.LineItems.First().Product.ShouldNotBeNull();
     }
 
     [Fact]
@@ -322,9 +322,9 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
-        order.LineItems.First().Product.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
+        order.LineItems.First().Product.ShouldNotBeNull();
     }
 
     [Fact]
@@ -340,8 +340,8 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
     }
 
     [Fact]
@@ -357,8 +357,8 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().BeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldBeNull();
     }
 
     [Fact]
@@ -374,10 +374,10 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull(); // From spec
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull(); // From spec
         var iPhone = order.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Images.Should().HaveCount(2); // From IncludePaths
+        iPhone.Product!.Images.Count.ShouldBe(2); // From IncludePaths
     }
 
     [Fact]
@@ -392,11 +392,11 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(c => c.Name == "Smartphones");
 
         // Assert
-        category.Should().NotBeNull();
-        category!.ParentCategory.Should().NotBeNull();
-        category.ParentCategory!.Name.Should().Be("Phones");
-        category.ParentCategory.ParentCategory.Should().NotBeNull();
-        category.ParentCategory.ParentCategory!.Name.Should().Be("Electronics");
+        category.ShouldNotBeNull();
+        category!.ParentCategory.ShouldNotBeNull();
+        category.ParentCategory!.Name.ShouldBe("Phones");
+        category.ParentCategory.ParentCategory.ShouldNotBeNull();
+        category.ParentCategory.ParentCategory!.Name.ShouldBe("Electronics");
     }
 
     [Fact]
@@ -411,13 +411,13 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - Verify includes were loaded
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
-        order.Payments.Should().HaveCount(1);
-        order.Payments.Should().AllSatisfy(p => p.PaymentMethod.Should().NotBeNull());
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null);
+        order.Payments.Count.ShouldBe(1);
+        order.Payments.ShouldAllBe(p => p.PaymentMethod != null);
     }
 
     [Fact]
@@ -432,13 +432,13 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - Verify data was loaded
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
 
         // Verify entity is not tracked
         var entry = context.Entry(order);
-        entry.State.Should().Be(EntityState.Detached);
+        entry.State.ShouldBe(EntityState.Detached);
     }
 
     [Fact]
@@ -453,12 +453,12 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - Verify data was loaded
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
 
         // Verify entity is not tracked
         var entry = context.Entry(order);
-        entry.State.Should().Be(EntityState.Detached);
+        entry.State.ShouldBe(EntityState.Detached);
     }
 
     [Fact]
@@ -473,15 +473,15 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - Verify includes were loaded
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null);
 
         // Verify entity is not tracked
         var entry = context.Entry(order);
-        entry.State.Should().Be(EntityState.Detached);
+        entry.State.ShouldBe(EntityState.Detached);
     }
 
     [Fact]
@@ -498,12 +498,12 @@ public class IncludeSpecTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - Verify data was loaded
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null);
 
         // Verify entity is not tracked
         var entry = context.Entry(order);
-        entry.State.Should().Be(EntityState.Detached);
+        entry.State.ShouldBe(EntityState.Detached);
     }
 }

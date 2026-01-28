@@ -30,9 +30,9 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Name.Should().Be("John Doe");
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Name.ShouldBe("John Doe");
     }
 
     [Fact]
@@ -48,10 +48,10 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.Address!.City.Should().Be("New York");
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.Address!.City.ShouldBe("New York");
     }
 
     [Fact]
@@ -66,8 +66,8 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -83,10 +83,10 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
-        order.LineItems.Select(li => li.Product!.Name).Should().Contain("iPhone 15");
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null);
+        order.LineItems.Select(li => li.Product!.Name).ShouldContain("iPhone 15");
     }
 
     [Fact]
@@ -103,10 +103,10 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         var iPhone = order!.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Category.Should().NotBeNull();
-        iPhone.Product.Category!.Name.Should().Be("Smartphones");
+        iPhone.Product!.Category.ShouldNotBeNull();
+        iPhone.Product.Category!.Name.ShouldBe("Smartphones");
     }
 
     [Fact]
@@ -124,11 +124,11 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         var iPhone = order!.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Category.Should().NotBeNull();
-        iPhone.Product.Category!.ParentCategory.Should().NotBeNull();
-        iPhone.Product.Category.ParentCategory!.Name.Should().Be("Phones");
+        iPhone.Product!.Category.ShouldNotBeNull();
+        iPhone.Product.Category!.ParentCategory.ShouldNotBeNull();
+        iPhone.Product.Category.ParentCategory!.Name.ShouldBe("Phones");
     }
 
     [Fact]
@@ -146,10 +146,10 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -167,11 +167,11 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.ShippingAddress.Should().NotBeNull();
-        order.BillingAddress.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.ShippingAddress.ShouldNotBeNull();
+        order.BillingAddress.ShouldNotBeNull();
     }
 
     [Fact]
@@ -188,10 +188,10 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         var iPhone = order.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Images.Should().HaveCount(2);
+        iPhone.Product!.Images.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -211,10 +211,10 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         var iPhone = order!.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Images.Should().HaveCount(2);
-        iPhone.Product.Tags.Should().HaveCount(2);
+        iPhone.Product!.Images.Count.ShouldBe(2);
+        iPhone.Product.Tags.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -251,39 +251,39 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert - verify everything is loaded
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
 
         // Customer branch
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
 
         // Address branches
-        order.ShippingAddress.Should().NotBeNull();
-        order.BillingAddress.Should().NotBeNull();
+        order.ShippingAddress.ShouldNotBeNull();
+        order.BillingAddress.ShouldNotBeNull();
 
         // LineItems -> Product -> Category -> ParentCategory
         var iPhone = order.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhone.Product!.Category.Should().NotBeNull();
-        iPhone.Product.Category!.ParentCategory.Should().NotBeNull();
+        iPhone.Product!.Category.ShouldNotBeNull();
+        iPhone.Product.Category!.ParentCategory.ShouldNotBeNull();
 
         // LineItems -> Product -> Images
-        iPhone.Product.Images.Should().HaveCount(2);
+        iPhone.Product.Images.Count.ShouldBe(2);
 
         // LineItems -> Product -> Supplier -> Address
-        iPhone.Product.Supplier.Should().NotBeNull();
-        iPhone.Product.Supplier!.Address.Should().NotBeNull();
+        iPhone.Product.Supplier.ShouldNotBeNull();
+        iPhone.Product.Supplier!.Address.ShouldNotBeNull();
 
         // LineItems -> Discounts
-        iPhone.Discounts.Should().HaveCount(1);
+        iPhone.Discounts.Count.ShouldBe(1);
 
         // Payments -> PaymentMethod
-        order.Payments.Should().HaveCount(1);
-        order.Payments.First().PaymentMethod.Should().NotBeNull();
+        order.Payments.Count.ShouldBe(1);
+        order.Payments.First().PaymentMethod.ShouldNotBeNull();
 
         // Notes -> Author
-        order.Notes.Should().HaveCount(1);
-        order.Notes.First().Author.Should().NotBeNull();
+        order.Notes.Count.ShouldBe(1);
+        order.Notes.First().Author.ShouldNotBeNull();
     }
 
     [Fact]
@@ -299,10 +299,10 @@ public class StandardIncludeTests
             .FirstOrDefaultAsync(c => c.Name == "Smartphones");
 
         // Assert
-        category.Should().NotBeNull();
-        category!.ParentCategory.Should().NotBeNull();
-        category.ParentCategory!.Name.Should().Be("Phones");
-        category.ParentCategory.ParentCategory.Should().NotBeNull();
-        category.ParentCategory.ParentCategory!.Name.Should().Be("Electronics");
+        category.ShouldNotBeNull();
+        category!.ParentCategory.ShouldNotBeNull();
+        category.ParentCategory!.Name.ShouldBe("Phones");
+        category.ParentCategory.ParentCategory.ShouldNotBeNull();
+        category.ParentCategory.ParentCategory!.Name.ShouldBe("Electronics");
     }
 }

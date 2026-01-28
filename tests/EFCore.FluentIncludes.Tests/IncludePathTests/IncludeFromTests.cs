@@ -34,13 +34,9 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li =>
-        {
-            li.Product.Should().NotBeNull();
-            li.Discounts.Should().NotBeNull();
-        });
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null && li.Discounts != null);
     }
 
     [Fact]
@@ -58,12 +54,12 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
         // Order 1 has iPhone ($999.99) and Phone Case ($29.99) - only iPhone should be included
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().UnitPrice.Should().Be(999.99m);
-        order.LineItems.First().Product.Should().NotBeNull();
-        order.LineItems.First().Discounts.Should().NotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().UnitPrice.ShouldBe(999.99m);
+        order.LineItems.First().Product.ShouldNotBeNull();
+        order.LineItems.First().Discounts.ShouldNotBeNull();
     }
 
     [Fact]
@@ -82,15 +78,15 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
 
         var iPhoneItem = order.LineItems.First(li => li.Product!.Name == "iPhone 15");
-        iPhoneItem.Product!.Category.Should().NotBeNull();
-        iPhoneItem.Product.Category!.ParentCategory.Should().NotBeNull();
-        iPhoneItem.Product.Images.Should().HaveCount(2);
-        iPhoneItem.Product.Supplier.Should().NotBeNull();
-        iPhoneItem.Product.Supplier!.Address.Should().NotBeNull();
+        iPhoneItem.Product!.Category.ShouldNotBeNull();
+        iPhoneItem.Product.Category!.ParentCategory.ShouldNotBeNull();
+        iPhoneItem.Product.Images.Count.ShouldBe(2);
+        iPhoneItem.Product.Supplier.ShouldNotBeNull();
+        iPhoneItem.Product.Supplier!.Address.ShouldNotBeNull();
     }
 
     #endregion
@@ -112,10 +108,10 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
     }
 
     [Fact]
@@ -133,10 +129,10 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
     }
 
     #endregion
@@ -165,21 +161,21 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
 
         // Customer group
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
 
         // Filtered LineItems group
-        order.LineItems.Should().HaveCount(1);
-        order.LineItems.First().Product.Should().NotBeNull();
-        order.LineItems.First().Product!.Category.Should().NotBeNull();
+        order.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().Product.ShouldNotBeNull();
+        order.LineItems.First().Product!.Category.ShouldNotBeNull();
 
         // Payments group
-        order.Payments.Should().HaveCount(1);
-        order.Payments.First().PaymentMethod.Should().NotBeNull();
+        order.Payments.Count.ShouldBe(1);
+        order.Payments.First().PaymentMethod.ShouldNotBeNull();
     }
 
     [Fact]
@@ -200,16 +196,16 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
 
         // From IncludeFrom
-        order!.LineItems.Should().HaveCount(2);
-        order.LineItems.First().Product.Should().NotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
+        order.LineItems.First().Product.ShouldNotBeNull();
 
         // From IncludePaths
-        order.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.ShippingAddress.Should().NotBeNull();
+        order.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.ShippingAddress.ShouldNotBeNull();
     }
 
     #endregion
@@ -230,13 +226,13 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
 
         var iPhoneItem = order.LineItems.First(li => li.Product!.Name == "iPhone 15");
         // iPhone has 2 images but only 1 is primary
-        iPhoneItem.Product!.Images.Should().HaveCount(1);
-        iPhoneItem.Product.Images.First().IsPrimary.Should().BeTrue();
+        iPhoneItem.Product!.Images.Count.ShouldBe(1);
+        iPhoneItem.Product.Images.First().IsPrimary.ShouldBeTrue();
     }
 
     [Fact]
@@ -254,14 +250,14 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
 
         var lineItem = order.LineItems.First();
-        lineItem.Product!.Images.Should().HaveCount(1);
-        lineItem.Product.Images.First().IsPrimary.Should().BeTrue();
-        lineItem.Product.Tags.Should().HaveCount(1);
-        lineItem.Product.Tags.First().Tag.Should().Be("premium");
+        lineItem.Product!.Images.Count.ShouldBe(1);
+        lineItem.Product.Images.First().IsPrimary.ShouldBeTrue();
+        lineItem.Product.Tags.Count.ShouldBe(1);
+        lineItem.Product.Tags.First().Tag.ShouldBe("premium");
     }
 
     #endregion
@@ -280,10 +276,10 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
         // Products should NOT be loaded since we didn't specify sub-paths
-        order.LineItems.Should().AllSatisfy(li => li.Product.Should().BeNull());
+        order.LineItems.ShouldAllBe(li => li.Product == null);
     }
 
     [Fact]
@@ -300,9 +296,9 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li => li.Product.Should().NotBeNull());
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null);
     }
 
     [Fact]
@@ -319,8 +315,8 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().BeEmpty();
+        order.ShouldNotBeNull();
+        order!.LineItems.ShouldBeEmpty();
     }
 
     [Fact]
@@ -339,9 +335,9 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1);
-        order.LineItems.First().Product.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1);
+        order.LineItems.First().Product.ShouldNotBeNull();
     }
 
     #endregion
@@ -365,9 +361,9 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(2);
-        order.LineItems.First().Product.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
+        order.LineItems.First().Product.ShouldNotBeNull();
     }
 
     [Fact]
@@ -387,8 +383,8 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().BeEmpty(); // Not loaded
+        order.ShouldNotBeNull();
+        order!.LineItems.ShouldBeEmpty(); // Not loaded
     }
 
     #endregion
@@ -407,11 +403,11 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
-        order!.LineItems.Should().HaveCount(1); // Filtered to > 100
-        order.LineItems.First().Product.Should().NotBeNull();
-        order.LineItems.First().Product!.Category.Should().NotBeNull();
-        order.LineItems.First().Discounts.Should().NotBeNull();
+        order.ShouldNotBeNull();
+        order!.LineItems.Count.ShouldBe(1); // Filtered to > 100
+        order.LineItems.First().Product.ShouldNotBeNull();
+        order.LineItems.First().Product!.Category.ShouldNotBeNull();
+        order.LineItems.First().Discounts.ShouldNotBeNull();
     }
 
     [Fact]
@@ -426,16 +422,16 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
 
         // From IncludeFrom
-        order!.LineItems.Should().HaveCount(2);
-        order.LineItems.First().Product.Should().NotBeNull();
+        order!.LineItems.Count.ShouldBe(2);
+        order.LineItems.First().Product.ShouldNotBeNull();
 
         // From regular Include
-        order.Customer.Should().NotBeNull();
-        order.Payments.Should().HaveCount(1);
-        order.Payments.First().PaymentMethod.Should().NotBeNull();
+        order.Customer.ShouldNotBeNull();
+        order.Payments.Count.ShouldBe(1);
+        order.Payments.First().PaymentMethod.ShouldNotBeNull();
     }
 
     [Fact]
@@ -450,24 +446,20 @@ public class IncludeFromTests
             .FirstOrDefaultAsync(o => o.Id == 1);
 
         // Assert
-        order.Should().NotBeNull();
+        order.ShouldNotBeNull();
 
         // Customer group
-        order!.Customer.Should().NotBeNull();
-        order.Customer!.Address.Should().NotBeNull();
-        order.Customer.PaymentMethods.Should().HaveCount(2);
+        order!.Customer.ShouldNotBeNull();
+        order.Customer!.Address.ShouldNotBeNull();
+        order.Customer.PaymentMethods.Count.ShouldBe(2);
 
         // LineItems group
-        order.LineItems.Should().HaveCount(2);
-        order.LineItems.Should().AllSatisfy(li =>
-        {
-            li.Product.Should().NotBeNull();
-            li.Discounts.Should().NotBeNull();
-        });
+        order.LineItems.Count.ShouldBe(2);
+        order.LineItems.ShouldAllBe(li => li.Product != null && li.Discounts != null);
 
         // Payments group
-        order.Payments.Should().HaveCount(1);
-        order.Payments.First().PaymentMethod.Should().NotBeNull();
+        order.Payments.Count.ShouldBe(1);
+        order.Payments.First().PaymentMethod.ShouldNotBeNull();
     }
 
     #endregion
